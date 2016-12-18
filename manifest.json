@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "Amazon Book Research Helper",
+  "description": "Writing to market? This extension shows the most important information about a book right at the top of the page.",
+  "version": "0.0.1",
+  "author": "Prompt Publishing",
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "matches": [ "*://*.amazon.com/*" ],
+      "css": [
+        "build/main.css"
+      ],
+      "js": [
+        "third-party/jquery.js",
+        "third-party/jquery.sticky.js",
+        "build/main.js"
+      ]
+    }
+  ],
+  "permissions": [
+    "*://*.amazon.com/*"
+  ]
+}

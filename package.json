@@ -1,0 +1,17 @@
+{
+  "name": "amazon-book-research-helper",
+  "private": true,
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watchjs": "coffee -w -o build src",
+    "watchcss": "stylus -w -o build src"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-script": "1.*",
+    "stylus": "0.*"
+  }
+}
