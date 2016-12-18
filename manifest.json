@@ -8,12 +8,12 @@
     {
       "all_frames": true,
       "matches": [ "*://*.amazon.com/*" ],
+      "run_at": "document_end",
       "css": [
         "build/main.css"
       ],
       "js": [
         "third-party/jquery.js",
-        "third-party/jquery.sticky.js",
         "build/main.js"
       ]
     }

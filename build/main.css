@@ -1,0 +1,17 @@
+#amazon-product-info-ext {
+  position: relative;
+  background: #c7d8ee;
+  text-align: center;
+  padding: 10px;
+  z-index: 10000;
+}
+#amazon-product-info-ext .hi {
+  font-weight: bold;
+  color: #035f38;
+}
+#amazon-product-info-ext ul.zg_hrsr {
+  color: #111;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.1;
+}
