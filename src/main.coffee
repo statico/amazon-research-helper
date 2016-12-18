@@ -13,7 +13,7 @@ $ ->
     el.find('b:eq(0)').remove()
     val = el.text().trim()
     details[key] = val
-    console.log key, ' = ', val.replace(/\s+/g, ' ') # XXX
+    #console.log key, ' = ', val.replace(/\s+/g, ' ') # XXX
     if key = 'Amazon Best Sellers Rank'
       categories = el.find('ul.zg_hrsr')
 
@@ -26,6 +26,12 @@ $ ->
     if rank < 10000 then 'IV' else \
     if rank < 100000 then 'V' else \
     'VI'
+
+  ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1])
+  ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1])
+
+  pubDate = moment(details['Publication Date'], 'MMMM D, YYYY')
+  age = moment.duration(moment().diff(pubDate))
 
   info = $('<div id="amazon-product-info-ext"/>')
   info.appendTo 'header'
@@ -47,6 +53,14 @@ $ ->
     'Tier ', tier
     ' - '
     "<a href='https://www.novelrank.com/asin/#{ asin }'>NovelRank</a>"
+    ' - '
+    'Rating: ', ratingAvg
+    ' - '
+    'Reviews: ', ratingCount
+    ' - '
+    'Age: ', "#{ Math.round(age.asWeeks()) } weeks"
+    ' - '
+    'Ratio: ', Number(age.asWeeks() / ratingCount).toFixed(2)
     '<br/>' # ------------
     categories
   ]

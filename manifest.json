@@ -14,6 +14,7 @@
       ],
       "js": [
         "third-party/jquery.js",
+        "third-party/moment.min.js",
         "build/main.js"
       ]
     }
