@@ -9,6 +9,12 @@
   font-weight: bold;
   color: #035f38;
 }
+#amazon-product-info-ext .authors a:after {
+  content: ', ';
+}
+#amazon-product-info-ext .authors a:last-child:after {
+  content: '';
+}
 #amazon-product-info-ext ul.zg_hrsr {
   color: #111;
   margin-top: 5px;

@@ -47,7 +47,7 @@ $ ->
       else
         return publisher
     ' - '
-    'Author: ', $('.author .contributorNameID').clone().attr(target: '_blank')
+    'Author: ', $('<span class=authors/>').append($('.author .contributorNameID').clone().attr(target: '_blank'))
     if details['Print Length'] then " - Length: #{details['Print Length']}"
     if details['File Size'] then " - Size: #{details['File Size']}"
     '<br/>' # ------------
