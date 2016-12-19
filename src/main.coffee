@@ -40,6 +40,10 @@ $ ->
   pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
   age = moment.duration(moment().diff(pubDate))
 
+  length = details['Print Length']
+  words = if length then Number(length.match(/(\d+)/)[1]) * 255 else 0
+  fileSize = details['File Size']
+
   info = $('<div id="amazon-product-info-ext"/>')
   info.appendTo 'header'
   info.append [
@@ -52,8 +56,8 @@ $ ->
         return publisher
     ' - '
     'Author: ', $('<span class=authors/>').append(author)
-    if details['Print Length'] then " - Length: #{details['Print Length']}"
-    if details['File Size'] then " - Size: #{details['File Size']}"
+    if length then " - Length: #{length} (~#{words} words)"
+    if fileSize then " - Size: #{fileSize}"
     '<br/>' # ------------
     'Rank: ', rawRank
     ' - '
@@ -63,7 +67,7 @@ $ ->
     ' - '
     'Rating: ', ratingAvg
     ' - '
-    'Reviews: ', ratingCount
+    'Reviews: ', "<a href=#customerReviews>#{ ratingCount }</a>"
     ' - '
     'Age: ', "#{ Math.round(age.asWeeks()) } weeks"
     ' - '

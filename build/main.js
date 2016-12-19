@@ -5,7 +5,7 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, author, categories, close, details, info, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier;
+    var age, asin, author, categories, close, details, fileSize, info, length, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier, words;
     if (!/Amazon Best Sellers Rank/.test($('body').text())) {
       return;
     }
@@ -40,6 +40,9 @@
     pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
+    length = details['Print Length'];
+    words = length ? Number(length.match(/(\d+)/)[1]) * 255 : 0;
+    fileSize = details['File Size'];
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
     info.append([
@@ -49,7 +52,7 @@
         } else {
           return publisher;
         }
-      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), details['Print Length'] ? " - Length: " + details['Print Length'] : void 0, details['File Size'] ? " - Size: " + details['File Size'] : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', ratingCount, ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
+      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? " - Length: " + length + " (~" + words + " words)" : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({
