@@ -5,7 +5,7 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, categories, close, details, info, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, removeBtn, tier;
+    var age, asin, author, categories, close, details, info, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier;
     if (!/Amazon Best Sellers Rank/.test($('body').text())) {
       return;
     }
@@ -22,12 +22,20 @@
         return categories = el.find('ul.zg_hrsr');
       }
     });
-    asin = details['ASIN'];
+    asin = details['ASIN'] || details['ISBN-10'];
     rawRank = details['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1];
     rank = Number(rawRank != null ? rawRank.replace(/[,#]/g, '') : void 0);
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
-    ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1]);
-    ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1]);
+    author = $('.author .contributorNameID').clone().attr({
+      target: '_blank'
+    });
+    if (!author.length) {
+      author = $('.author .a-link-normal').clone().attr({
+        target: '_blank'
+      });
+    }
+    ratingAvg = Number((ref = $('#summaryStars a.product-reviews-link').attr('title')) != null ? ref.match(/([\d\.]+)/)[1] : void 0);
+    ratingCount = Number((ref1 = $('#acrCustomerReviewText').text().match(/([\d\.]+)/)) != null ? ref1[1] : void 0);
     publisher = details['Publisher'] ? details['Publisher'].replace(/;.*/, '') : details['Sold by'];
     pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
@@ -41,9 +49,7 @@
         } else {
           return publisher;
         }
-      })(), ' - ', 'Author: ', $('<span class=authors/>').append($('.author .contributorNameID').clone().attr({
-        target: '_blank'
-      })), details['Print Length'] ? " - Length: " + details['Print Length'] : void 0, details['File Size'] ? " - Size: " + details['File Size'] : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', ratingCount, ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
+      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), details['Print Length'] ? " - Length: " + details['Print Length'] : void 0, details['File Size'] ? " - Size: " + details['File Size'] : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', ratingCount, ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({

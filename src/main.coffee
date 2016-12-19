@@ -17,7 +17,7 @@ $ ->
     if key = 'Amazon Best Sellers Rank'
       categories = el.find('ul.zg_hrsr')
 
-  asin = details['ASIN']
+  asin = details['ASIN'] or details['ISBN-10']
   rawRank = details['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1]
   rank = Number(rawRank?.replace(/[,#]/g,''))
   tier = if rank < 10 then '1' else \
@@ -27,8 +27,12 @@ $ ->
     if rank < 100000 then 'V' else \
     'VI'
 
-  ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1])
-  ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1])
+  author = $('.author .contributorNameID').clone().attr(target: '_blank')
+  if not author.length
+    author = $('.author .a-link-normal').clone().attr(target: '_blank')
+
+  ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title')?.match(/([\d\.]+)/)[1])
+  ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)?[1])
 
   publisher = if details['Publisher'] then details['Publisher'].replace(/;.*/, '') else details['Sold by']
 
@@ -47,7 +51,7 @@ $ ->
       else
         return publisher
     ' - '
-    'Author: ', $('<span class=authors/>').append($('.author .contributorNameID').clone().attr(target: '_blank'))
+    'Author: ', $('<span class=authors/>').append(author)
     if details['Print Length'] then " - Length: #{details['Print Length']}"
     if details['File Size'] then " - Size: #{details['File Size']}"
     '<br/>' # ------------
