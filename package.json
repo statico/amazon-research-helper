@@ -7,7 +7,7 @@
   "scripts": {
     "watchjs": "coffee -w -o build src",
     "watchcss": "stylus -w -o build src",
-    "release": "rm -f /tmp/ext.zip && zip -r /tmp/ext.zip manifest.json third-party build && ls -l /tmp/ext.zip"
+    "release": "rm -f /tmp/ext.zip && zip -r /tmp/ext.zip manifest.json third-party build assets/icon.png && ls -l /tmp/ext.zip"
   },
   "author": "",
   "license": "ISC",
