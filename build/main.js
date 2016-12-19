@@ -5,7 +5,7 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, categories, close, details, info, pubDate, rank, ratingAvg, ratingCount, rawRank, removeBtn, tier;
+    var age, asin, categories, close, details, info, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, removeBtn, tier;
     if (!/Amazon Best Sellers Rank/.test($('body').text())) {
       return;
     }
@@ -28,22 +28,22 @@
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
     ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1]);
     ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1]);
-    pubDate = moment(details['Publication Date'], 'MMMM D, YYYY');
+    publisher = details['Sold by'] || details['Publisher'].replace(/;.*/, '');
+    pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
+    pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
     info.append([
       "<b>" + ($('#title').text()) + "</b>", '<br/>', 'Publisher: ', (function() {
-        var pub;
-        pub = details['Sold by'];
-        if (/Amazon\s+Digital\s+Services\s+LLC/.test(pub)) {
+        if (/Amazon\s+Digital\s+Services\s+LLC/.test(publisher)) {
           return '<span class=hi>Self-Published</span>';
         } else {
-          return pub;
+          return publisher;
         }
       })(), ' - ', 'Author: ', $('.author .contributorNameID').clone().attr({
         target: '_blank'
-      }), ' - ', 'Length: ', details['Print Length'], ' - ', 'File Size: ', details['File Size'], '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', ratingCount, ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(age.asWeeks() / ratingCount).toFixed(2), '<br/>', categories
+      }), details['Print Length'] ? " - Length: " + details['Print Length'] : void 0, details['File Size'] ? " - Size: " + details['File Size'] : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', ratingCount, ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({

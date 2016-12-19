@@ -30,7 +30,10 @@ $ ->
   ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1])
   ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1])
 
-  pubDate = moment(details['Publication Date'], 'MMMM D, YYYY')
+  publisher = details['Sold by'] or details['Publisher'].replace(/;.*/, '')
+
+  pubDateRaw = details['Publication Date'] or details['Publisher'].match(/\((.*)\)/)[1]
+  pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
   age = moment.duration(moment().diff(pubDate))
 
   info = $('<div id="amazon-product-info-ext"/>')
@@ -39,14 +42,14 @@ $ ->
     "<b>#{ $('#title').text() }</b>",
     '<br/>' # ------------
     'Publisher: ', do ->
-      pub = details['Sold by']
-      return if /Amazon\s+Digital\s+Services\s+LLC/.test(pub) then '<span class=hi>Self-Published</span>' else pub
+      if /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
+        return '<span class=hi>Self-Published</span>'
+      else
+        return publisher
     ' - '
     'Author: ', $('.author .contributorNameID').clone().attr(target: '_blank')
-    ' - '
-    'Length: ', details['Print Length']
-    ' - '
-    'File Size: ', details['File Size']
+    if details['Print Length'] then " - Length: #{details['Print Length']}"
+    if details['File Size'] then " - Size: #{details['File Size']}"
     '<br/>' # ------------
     'Rank: ', rawRank
     ' - '
@@ -60,7 +63,7 @@ $ ->
     ' - '
     'Age: ', "#{ Math.round(age.asWeeks()) } weeks"
     ' - '
-    'Ratio: ', Number(age.asWeeks() / ratingCount).toFixed(2)
+    'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2)
     '<br/>' # ------------
     categories
   ]
