@@ -28,7 +28,7 @@
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
     ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1]);
     ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1]);
-    publisher = details['Sold by'] || details['Publisher'].replace(/;.*/, '');
+    publisher = details['Publisher'] ? details['Publisher'].replace(/;.*/, '') : details['Sold by'];
     pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));

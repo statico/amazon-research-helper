@@ -3,7 +3,7 @@
   background: #c7d8ee;
   text-align: center;
   padding: 10px;
-  z-index: 10000;
+  z-index: 99;
 }
 #amazon-product-info-ext .hi {
   font-weight: bold;

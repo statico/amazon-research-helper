@@ -30,7 +30,7 @@ $ ->
   ratingAvg = Number($('#summaryStars a.product-reviews-link').attr('title').match(/([\d\.]+)/)[1])
   ratingCount = Number($('#acrCustomerReviewText').text().match(/([\d\.]+)/)[1])
 
-  publisher = details['Sold by'] or details['Publisher'].replace(/;.*/, '')
+  publisher = if details['Publisher'] then details['Publisher'].replace(/;.*/, '') else details['Sold by']
 
   pubDateRaw = details['Publication Date'] or details['Publisher'].match(/\((.*)\)/)[1]
   pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
