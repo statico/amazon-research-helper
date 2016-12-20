@@ -40,7 +40,7 @@
     pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
-    length = details['Print Length'];
+    length = details['Print Length'] || details['Paperback'] || details['Hardcover'];
     words = length ? Number(length.match(/(\d+)/)[1]) * 255 : 0;
     fileSize = details['File Size'];
     info = $('<div id="amazon-product-info-ext"/>');

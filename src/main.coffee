@@ -40,7 +40,7 @@ $ ->
   pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
   age = moment.duration(moment().diff(pubDate))
 
-  length = details['Print Length']
+  length = details['Print Length'] or details['Paperback'] or details['Hardcover']
   words = if length then Number(length.match(/(\d+)/)[1]) * 255 else 0
   fileSize = details['File Size']
 
