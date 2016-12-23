@@ -44,7 +44,7 @@
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
     length = d['Print Length'] || d['Paperback'] || d['Hardcover'];
-    words = length ? Number(length.match(/(\d+)/)[1]) * 255 : 0;
+    words = length ? Number(length.match(/(\d+)/)[1]) * 225 : 0;
     fileSize = d['File Size'];
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
@@ -55,7 +55,7 @@
         } else {
           return publisher;
         }
-      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? " - Length: " + length + " (~" + (words.toLocaleString()) + " words)" : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
+      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? (" - Length: " + length + " (~" + (words.toLocaleString()) + " words)") + '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>' : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>', ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>', '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({

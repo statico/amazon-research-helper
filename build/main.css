@@ -5,6 +5,13 @@
   padding: 10px;
   z-index: 99;
 }
+#amazon-product-info-ext abbr {
+  border-bottom: dotted 1px #111;
+  cursor: help;
+}
+#amazon-product-info-ext abbr:hover {
+  border-bottom: solid 1px #111;
+}
 #amazon-product-info-ext .hi {
   font-weight: bold;
   color: #035f38;

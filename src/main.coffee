@@ -50,7 +50,7 @@ $ ->
   age = moment.duration(moment().diff(pubDate))
 
   length = d['Print Length'] or d['Paperback'] or d['Hardcover']
-  words = if length then Number(length.match(/(\d+)/)[1]) * 255 else 0
+  words = if length then Number(length.match(/(\d+)/)[1]) * 225 else 0
   fileSize = d['File Size']
 
   info = $('<div id="amazon-product-info-ext"/>')
@@ -65,12 +65,15 @@ $ ->
         return publisher
     ' - '
     'Author: ', $('<span class=authors/>').append(author)
-    if length then " - Length: #{length} (~#{words.toLocaleString()} words)"
+    if length
+      " - Length: #{length} (~#{words.toLocaleString()} words)" + \
+      '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>'
     if fileSize then " - Size: #{fileSize}"
     '<br/>' # ------------
     'Rank: ', rawRank
     ' - '
     'Tier ', tier
+    '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
     ' - '
     "<a href='https://www.novelrank.com/asin/#{ asin }'>NovelRank</a>"
     ' - '
@@ -81,6 +84,7 @@ $ ->
     'Age: ', "#{ Math.round(age.asWeeks()) } weeks"
     ' - '
     'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2)
+    '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>'
     '<br/>' # ------------
     categories
   ]
