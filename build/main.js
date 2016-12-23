@@ -55,7 +55,7 @@
         } else {
           return publisher;
         }
-      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? " - Length: " + length + " (~" + words + " words)" : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
+      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? " - Length: " + length + " (~" + (words.toLocaleString()) + " words)" : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({

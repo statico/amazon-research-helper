@@ -65,7 +65,7 @@ $ ->
         return publisher
     ' - '
     'Author: ', $('<span class=authors/>').append(author)
-    if length then " - Length: #{length} (~#{words} words)"
+    if length then " - Length: #{length} (~#{words.toLocaleString()} words)"
     if fileSize then " - Size: #{fileSize}"
     '<br/>' # ------------
     'Rank: ', rawRank
