@@ -8,7 +8,12 @@
   "content_scripts": [
     {
       "all_frames": true,
-      "matches": [ "*://*.amazon.com/*" ],
+      "matches": [
+        "*://*.amazon.com/*",
+        "*://*.amazon.ca/*",
+        "*://*.amazon.com.au/*",
+        "*://*.amazon.co.uk/*"
+      ],
       "run_at": "document_end",
       "css": [
         "build/main.css"
@@ -21,6 +26,9 @@
     }
   ],
   "permissions": [
-    "*://*.amazon.com/*"
+    "*://*.amazon.com/*",
+    "*://*.amazon.ca/*",
+    "*://*.amazon.com.au/*",
+    "*://*.amazon.co.uk/*"
   ]
 }

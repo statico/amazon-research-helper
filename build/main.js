@@ -5,25 +5,28 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, author, categories, close, details, fileSize, info, length, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier, words;
-    if (!/Amazon Best Sellers Rank/.test($('body').text())) {
+    var age, asin, author, categories, close, d, fileSize, info, length, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier, words;
+    if (!/Amazon Best(s| S)ellers Rank/.test($('body').text())) {
       return;
     }
-    details = {};
+    d = {};
     categories = $();
-    $('#productDetailsTable .content > ul > li').each(function() {
+    $('#productDetailsTable, #detail_bullets_id').find('.content > ul > li').each(function() {
       var el, key, val;
       key = $(this).find('b:eq(0)').text().replace(/:$/, '').trim();
       el = $(this).clone();
       el.find('b:eq(0)').remove();
       val = el.text().trim();
-      details[key] = val;
-      if (key = 'Amazon Best Sellers Rank') {
+      if (key === 'Amazon Bestsellers Rank') {
+        key = 'Amazon Best Sellers Rank';
+      }
+      d[key] = val;
+      if (key === 'Amazon Best Sellers Rank') {
         return categories = el.find('ul.zg_hrsr');
       }
     });
-    asin = details['ASIN'] || details['ISBN-10'];
-    rawRank = details['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1];
+    asin = d['ASIN'] || d['ISBN-10'];
+    rawRank = d['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1];
     rank = Number(rawRank != null ? rawRank.replace(/[,#]/g, '') : void 0);
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
     author = $('.author .contributorNameID').clone().attr({
@@ -34,15 +37,15 @@
         target: '_blank'
       });
     }
-    ratingAvg = Number((ref = $('#summaryStars a.product-reviews-link').attr('title')) != null ? ref.match(/([\d\.]+)/)[1] : void 0);
-    ratingCount = Number((ref1 = $('#acrCustomerReviewText').text().match(/([\d\.]+)/)) != null ? ref1[1] : void 0);
-    publisher = details['Publisher'] ? details['Publisher'].replace(/;.*/, '') : details['Sold by'];
-    pubDateRaw = details['Publication Date'] || details['Publisher'].match(/\((.*)\)/)[1];
+    ratingAvg = Number((ref = $('#summaryStars a.product-reviews-link').attr('title') || $('#revFMSR a').attr('title')) != null ? ref.match(/(\d+[\d\.]*)/)[1] : void 0);
+    ratingCount = Number((ref1 = ($('#acrCustomerReviewText').text() || $('#revSAFRLU').text()).match(/(\d+[\d\.]*)/)) != null ? ref1[1] : void 0);
+    publisher = d['Publisher'] ? d['Publisher'].replace(/;.*/, '') : d['Sold by'];
+    pubDateRaw = d['Publication Date'] || d['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
-    length = details['Print Length'] || details['Paperback'] || details['Hardcover'];
+    length = d['Print Length'] || d['Paperback'] || d['Hardcover'];
     words = length ? Number(length.match(/(\d+)/)[1]) * 255 : 0;
-    fileSize = details['File Size'];
+    fileSize = d['File Size'];
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
     info.append([
