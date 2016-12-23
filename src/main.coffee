@@ -5,6 +5,11 @@ $ ->
   if not /Amazon Best(s| S)ellers Rank/.test $('body').text()
     return
 
+  num = (str) ->
+    m = str?.match(/(\d+[\d\.,]*)/)?[1]
+    m = m?.replace?(/,/g, '')
+    return Number(m)
+
   d = {}
   categories = $()
   $('#productDetailsTable, #detail_bullets_id').find('.content > ul > li').each ->
@@ -20,8 +25,7 @@ $ ->
       categories = el.find('ul.zg_hrsr')
 
   asin = d['ASIN'] or d['ISBN-10']
-  rawRank = d['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1]
-  rank = Number(rawRank?.replace(/[,#]/g,''))
+  rank = num d['Amazon Best Sellers Rank']
   tier = if rank < 10 then '1' else \
     if rank < 100 then '2' else \
     if rank < 1000 then 'III' else \
@@ -33,15 +37,11 @@ $ ->
   if not author.length
     author = $('.author .a-link-normal').clone().attr(target: '_blank')
 
-  ratingAvg = Number(
-    (
-      $('#summaryStars a.product-reviews-link').attr('title') or
-      $('#revFMSR a').attr('title')
-    )?.match(/(\d+[\d\.]*)/)[1]
+  ratingAvg = num(
+    $('#summaryStars a.product-reviews-link').attr('title') or
+    $('#revFMSR a').attr('title')
   )
-  ratingCount = Number(
-    ($('#acrCustomerReviewText').text() or $('#revSAFRLU').text()).match(/(\d+[\d\.]*)/)?[1]
-  )
+  ratingCount = num($('#acrCustomerReviewText').text() or $('#revSAFRLU').text())
 
   publisher = if d['Publisher'] then d['Publisher'].replace(/;.*/, '') else d['Sold by']
 
@@ -50,7 +50,7 @@ $ ->
   age = moment.duration(moment().diff(pubDate))
 
   length = d['Print Length'] or d['Paperback'] or d['Hardcover']
-  words = if length then Number(length.match(/(\d+)/)[1]) * 225 else 0
+  words = if length then num(length) * 225 else 0
   fileSize = d['File Size']
 
   info = $('<div id="amazon-product-info-ext"/>')
@@ -70,7 +70,7 @@ $ ->
       '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>'
     if fileSize then " - Size: #{fileSize}"
     '<br/>' # ------------
-    'Rank: ', rawRank
+    'Rank: #', rank.toLocaleString()
     ' - '
     'Tier ', tier
     '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
@@ -79,7 +79,7 @@ $ ->
     ' - '
     'Rating: ', ratingAvg
     ' - '
-    'Reviews: ', "<a href=#customerReviews>#{ ratingCount }</a>"
+    'Reviews: ', "<a href=#customerReviews>#{ ratingCount.toLocaleString() }</a>"
     ' - '
     'Age: ', "#{ Math.round(age.asWeeks()) } weeks"
     ' - '

@@ -5,10 +5,16 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, author, categories, close, d, fileSize, info, length, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, rawRank, ref, ref1, removeBtn, tier, words;
+    var age, asin, author, categories, close, d, fileSize, info, length, num, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, removeBtn, tier, words;
     if (!/Amazon Best(s| S)ellers Rank/.test($('body').text())) {
       return;
     }
+    num = function(str) {
+      var m, ref;
+      m = str != null ? (ref = str.match(/(\d+[\d\.,]*)/)) != null ? ref[1] : void 0 : void 0;
+      m = m != null ? typeof m.replace === "function" ? m.replace(/,/g, '') : void 0 : void 0;
+      return Number(m);
+    };
     d = {};
     categories = $();
     $('#productDetailsTable, #detail_bullets_id').find('.content > ul > li').each(function() {
@@ -26,8 +32,7 @@
       }
     });
     asin = d['ASIN'] || d['ISBN-10'];
-    rawRank = d['Amazon Best Sellers Rank'].match(/(#[\d,]+)/)[1];
-    rank = Number(rawRank != null ? rawRank.replace(/[,#]/g, '') : void 0);
+    rank = num(d['Amazon Best Sellers Rank']);
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
     author = $('.author .contributorNameID').clone().attr({
       target: '_blank'
@@ -37,14 +42,14 @@
         target: '_blank'
       });
     }
-    ratingAvg = Number((ref = $('#summaryStars a.product-reviews-link').attr('title') || $('#revFMSR a').attr('title')) != null ? ref.match(/(\d+[\d\.]*)/)[1] : void 0);
-    ratingCount = Number((ref1 = ($('#acrCustomerReviewText').text() || $('#revSAFRLU').text()).match(/(\d+[\d\.]*)/)) != null ? ref1[1] : void 0);
+    ratingAvg = num($('#summaryStars a.product-reviews-link').attr('title') || $('#revFMSR a').attr('title'));
+    ratingCount = num($('#acrCustomerReviewText').text() || $('#revSAFRLU').text());
     publisher = d['Publisher'] ? d['Publisher'].replace(/;.*/, '') : d['Sold by'];
     pubDateRaw = d['Publication Date'] || d['Publisher'].match(/\((.*)\)/)[1];
     pubDate = moment(pubDateRaw, 'MMMM D, YYYY');
     age = moment.duration(moment().diff(pubDate));
     length = d['Print Length'] || d['Paperback'] || d['Hardcover'];
-    words = length ? Number(length.match(/(\d+)/)[1]) * 225 : 0;
+    words = length ? num(length) * 225 : 0;
     fileSize = d['File Size'];
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
@@ -55,7 +60,7 @@
         } else {
           return publisher;
         }
-      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? (" - Length: " + length + " (~" + (words.toLocaleString()) + " words)") + '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>' : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: ', rawRank, ' - ', 'Tier ', tier, '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>', ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + ratingCount + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>', '<br/>', categories
+      })(), ' - ', 'Author: ', $('<span class=authors/>').append(author), length ? (" - Length: " + length + " (~" + (words.toLocaleString()) + " words)") + '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>' : void 0, fileSize ? " - Size: " + fileSize : void 0, '<br/>', 'Rank: #', rank.toLocaleString(), ' - ', 'Tier ', tier, '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>', ' - ', "<a href='https://www.novelrank.com/asin/" + asin + "'>NovelRank</a>", ' - ', 'Rating: ', ratingAvg, ' - ', 'Reviews: ', "<a href=#customerReviews>" + (ratingCount.toLocaleString()) + "</a>", ' - ', 'Age: ', (Math.round(age.asWeeks())) + " weeks", ' - ', 'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2), '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>', '<br/>', categories
     ]);
     close = $('<div/>');
     close.css({
