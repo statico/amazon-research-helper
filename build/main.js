@@ -152,7 +152,7 @@
   $ = jQuery.noConflict();
 
   $(function() {
-    var age, asin, author, catTableButton, categories, close, d, fileSize, info, length, num, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, removeBtn, tier, words;
+    var age, allCategories, asin, author, catTableButton, categories, close, d, fetchAllCategories, fileSize, info, length, num, pubDate, pubDateRaw, publisher, rank, ratingAvg, ratingCount, removeBtn, tier, words;
     if (!/Amazon Best(s| S)ellers Rank/.test($('body').text())) {
       return;
     }
@@ -178,6 +178,7 @@
         return categories = el.find('ul.zg_hrsr');
       }
     });
+    allCategories = $('h2:contains("Similar Items by Category") ~ .content ul');
     asin = $('input[name="ASIN.0"]').val();
     rank = num(d['Amazon Best Sellers Rank']);
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
@@ -198,7 +199,11 @@
     length = d['Print Length'] || d['Paperback'] || d['Hardcover'];
     words = length ? num(length) * 250 : 0;
     fileSize = d['File Size'];
-    catTableButton = $('<span class="a-button a-button-small"> <span class="a-button-inner"> <span class="a-button-text a-text-center">Expand All</span> </span> </span>');
+    if (allCategories.length) {
+      catTableButton = $('<span class="a-button a-button-small"> <span class="a-button-inner"> <span class="a-button-text a-text-center">Expand ▼</span> </span> </span>');
+    } else {
+      catTableButton = $('<span class="a-button a-button-small a-button-disabled"> <span class="a-button-inner"> <span class="a-button-text a-text-center">No Additional Categories</span> </span> </span>');
+    }
     info = $('<div id="amazon-product-info-ext"/>');
     info.appendTo('header');
     info.append([
@@ -226,7 +231,7 @@
       return e.preventDefault();
     });
     removeBtn.appendTo(close);
-    return catTableButton.on('click', function() {
+    fetchAllCategories = function() {
       var crumb, i, id, idToRank, len, li, next, ref, ref1;
       catTableButton = catTableButton.parent();
       catTableButton.html('<div class="sk-fading-circle">\n  <div class="sk-circle1 sk-circle"></div>\n  <div class="sk-circle2 sk-circle"></div>\n  <div class="sk-circle3 sk-circle"></div>\n  <div class="sk-circle4 sk-circle"></div>\n  <div class="sk-circle5 sk-circle"></div>\n  <div class="sk-circle6 sk-circle"></div>\n  <div class="sk-circle7 sk-circle"></div>\n  <div class="sk-circle8 sk-circle"></div>\n  <div class="sk-circle9 sk-circle"></div>\n  <div class="sk-circle10 sk-circle"></div>\n  <div class="sk-circle11 sk-circle"></div>\n  <div class="sk-circle12 sk-circle"></div>\n</div>');
@@ -244,9 +249,10 @@
         idToRank[id] = rank;
       }
       categories = categories.parent();
+      return;
       categories.empty().css({
         textAlign: 'left'
-      }).append($('h2:contains("Similar Items by Category") ~ .content ul').clone().addClass('zg_hrsr'));
+      }).append(allCategories.clone().addClass('zg_hrsr'));
       next = function(fn) {
         return setTimeout(fn, 500);
       };
@@ -293,7 +299,10 @@
         console.log('done');
         return catTableButton.detach();
       });
-    });
+    };
+    if (allCategories.length) {
+      return catTableButton.on('click', fetchAllCategories);
+    }
   });
 
 }).call(this);

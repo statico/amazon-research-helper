@@ -132,6 +132,8 @@ $ ->
     if key is 'Amazon Best Sellers Rank'
       categories = el.find('ul.zg_hrsr')
 
+  allCategories = $('h2:contains("Similar Items by Category") ~ .content ul')
+
   asin = $('input[name="ASIN.0"]').val()
   rank = num d['Amazon Best Sellers Rank']
   tier = if rank < 10 then '1' else \
@@ -161,13 +163,21 @@ $ ->
   words = if length then num(length) * 250 else 0
   fileSize = d['File Size']
 
-  catTableButton = $('
-    <span class="a-button a-button-small">
-      <span class="a-button-inner">
-        <span class="a-button-text a-text-center">Expand All</span>
+  if allCategories.length
+    catTableButton = $('
+      <span class="a-button a-button-small">
+        <span class="a-button-inner">
+          <span class="a-button-text a-text-center">Expand ▼</span>
+        </span>
       </span>
-    </span>
-  ')
+    ')
+  else catTableButton = $('
+      <span class="a-button a-button-small a-button-disabled">
+        <span class="a-button-inner">
+          <span class="a-button-text a-text-center">No Additional Categories</span>
+        </span>
+      </span>
+    ')
 
   info = $('<div id="amazon-product-info-ext"/>')
   info.appendTo 'header'
@@ -225,7 +235,7 @@ $ ->
     e.preventDefault()
   removeBtn.appendTo close
 
-  catTableButton.on 'click', ->
+  fetchAllCategories = ->
     catTableButton = catTableButton.parent()
     catTableButton.html '''
       <div class="sk-fading-circle">
@@ -255,10 +265,11 @@ $ ->
       idToRank[id] = rank
 
     categories = categories.parent()
+    return
     categories
       .empty()
       .css(textAlign: 'left')
-      .append($('h2:contains("Similar Items by Category") ~ .content ul').clone().addClass('zg_hrsr'))
+      .append(allCategories.clone().addClass('zg_hrsr'))
 
     next = (fn) -> setTimeout fn, 500
 
@@ -300,6 +311,8 @@ $ ->
       console.log 'done'
       catTableButton.detach()
 
+  if allCategories.length
+    catTableButton.on 'click', fetchAllCategories
 
 
 
