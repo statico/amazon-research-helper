@@ -50,7 +50,7 @@ $ ->
   age = moment.duration(moment().diff(pubDate))
 
   length = d['Print Length'] or d['Paperback'] or d['Hardcover']
-  words = if length then num(length) * 225 else 0
+  words = if length then num(length) * 250 else 0
   fileSize = d['File Size']
 
   info = $('<div id="amazon-product-info-ext"/>')
@@ -67,7 +67,7 @@ $ ->
     'Author: ', $('<span class=authors/>').append(author)
     if length
       " - Length: #{length} (~#{words.toLocaleString()} words)" + \
-      '<sup><abbr title="Number of pages times 225 words per page">?</abbr></sup>'
+      '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
     if fileSize then " - Size: #{fileSize}"
     '<br/>' # ------------
     'Rank: #', rank.toLocaleString()
