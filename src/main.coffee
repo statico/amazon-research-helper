@@ -1,3 +1,111 @@
+# async {{{1
+
+barrier = (count, finalCallback) ->
+  return finalCallback() if count == 0
+  return ->
+    count--
+    finalCallback() if count == 0
+
+series = (steps, finalCallback) ->
+  index = 0
+
+  processNextStep = (lastArgs = []) ->
+    if not steps[index]?
+      finalArgs = [null].concat(lastArgs) # (err, arg1, arg2, ...)
+      finalCallback?.apply null, finalArgs
+      return
+
+    callback = (err, args...) ->
+      if err?
+        finalCallback? err
+      else
+        processNextStep args
+      return
+
+    nextArgs = lastArgs.concat(callback) # (arg1, arg2, ..., cb)
+    steps[index++].apply null, nextArgs
+    return
+
+  processNextStep()
+  return
+
+parallel = (steps, finalCallback) ->
+  if steps.length == 0
+    finalCallback? null
+    return
+
+  errors = []
+  count = steps.length
+  barrier = (err) ->
+    if err? and count >= 0
+      count = -1
+      finalCallback? err
+    else
+      count--
+      if count == 0
+        finalCallback? null
+    return
+
+  for step in steps
+    step barrier
+
+  return
+
+aWhile = (condition, iterator, finalCallback) ->
+  process = ->
+    if not condition()
+      finalCallback? null
+      return
+    callback = (err) ->
+      if err?
+        finalCallback? err
+      else
+        process()
+      return
+    iterator callback
+    return
+
+  process()
+  return
+
+forEachSeries = (array, iterator, finalCallback) ->
+  index = 0
+  length = array.length
+  condition = ->
+    return index < length
+  arrayIterator = (cb) ->
+    iterator array[index++], cb
+    return
+  aWhile condition, arrayIterator, finalCallback
+  return
+
+forEachParallel = (array, iterator, limit, finalCallback) ->
+  if not finalCallback?
+    finalCallback = limit
+    limit = Infinity
+  return finalCallback(null) unless array.length
+
+  errors = []
+  inFlight = index = 0
+
+  done = (err) ->
+    errors.push err if err
+    inFlight--
+    if inFlight == 0 and index >= array.length
+      finalCallback(if errors.length then errors else null)
+    else
+      next()
+
+  next = ->
+    while inFlight < limit and index < array.length
+      inFlight++
+      iterator array[index++], done
+
+  next()
+  return
+
+# }}}
+
 $ = jQuery.noConflict()
 
 $ ->
@@ -24,7 +132,7 @@ $ ->
     if key is 'Amazon Best Sellers Rank'
       categories = el.find('ul.zg_hrsr')
 
-  asin = d['ASIN'] or d['ISBN-10']
+  asin = $('input[name="ASIN.0"]').val()
   rank = num d['Amazon Best Sellers Rank']
   tier = if rank < 10 then '1' else \
     if rank < 100 then '2' else \
@@ -53,6 +161,14 @@ $ ->
   words = if length then num(length) * 250 else 0
   fileSize = d['File Size']
 
+  catTableButton = $('
+    <span class="a-button a-button-small">
+      <span class="a-button-inner">
+        <span class="a-button-text a-text-center">Expand All</span>
+      </span>
+    </span>
+  ')
+
   info = $('<div id="amazon-product-info-ext"/>')
   info.appendTo 'header'
   info.append [
@@ -69,6 +185,8 @@ $ ->
       " - Length: #{length} (~#{words.toLocaleString()} words)" + \
       '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
     if fileSize then " - Size: #{fileSize}"
+    ' - '
+    'ASIN: ', asin
     '<br/>' # ------------
     'Rank: #', rank.toLocaleString()
     ' - '
@@ -86,7 +204,10 @@ $ ->
     'Ratio: ', Number(ratingCount / age.asWeeks()).toFixed(2)
     '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>'
     '<br/>' # ------------
-    categories
+    $('<div class="cat-table"/>').append(
+      $('<div class="cat-table-cell"/>').append(categories)
+      $('<div class="cat-table-cell"/>').append(catTableButton)
+    )
   ]
 
   close = $('<div/>')
@@ -103,4 +224,85 @@ $ ->
     info.hide()
     e.preventDefault()
   removeBtn.appendTo close
+
+  catTableButton.on 'click', ->
+    catTableButton = catTableButton.parent()
+    catTableButton.html '''
+      <div class="sk-fading-circle">
+        <div class="sk-circle1 sk-circle"></div>
+        <div class="sk-circle2 sk-circle"></div>
+        <div class="sk-circle3 sk-circle"></div>
+        <div class="sk-circle4 sk-circle"></div>
+        <div class="sk-circle5 sk-circle"></div>
+        <div class="sk-circle6 sk-circle"></div>
+        <div class="sk-circle7 sk-circle"></div>
+        <div class="sk-circle8 sk-circle"></div>
+        <div class="sk-circle9 sk-circle"></div>
+        <div class="sk-circle10 sk-circle"></div>
+        <div class="sk-circle11 sk-circle"></div>
+        <div class="sk-circle12 sk-circle"></div>
+      </div>
+    '''
+
+    idToRank = {}
+    for li in $(categories).find('li')
+      li = $(li)
+      rank = num li.find('.zg_hrsr_rank').text()
+      crumb = li.find('.zg_hrsr_ladder')
+      $(crumb.contents())[0]?.remove()
+      id = num li.find('a:last').attr('href')
+      #console.log 'XXX', id, rank, crumb.text()
+      idToRank[id] = rank
+
+    categories = categories.parent()
+    categories
+      .empty()
+      .css(textAlign: 'left')
+      .append($('h2:contains("Similar Items by Category") ~ .content ul').clone().addClass('zg_hrsr'))
+
+    next = (fn) -> setTimeout fn, 500
+
+    forEachSeries categories.find('li'), (li, cb) ->
+      li = $(li)
+      id = Number li.find('a:last').attr('href').match(/node=(\d+)/)?[1]
+      console.log "looking up book in category #{id}..."
+      if id of idToRank
+        console.log "already had rank #{idToRank[id]} in preview."
+        li.append(" - ##{ idToRank[id] }")
+        return next(cb)
+
+      page = 1
+      {host, protocol} = document.location
+      fetch = ->
+        url =  "#{protocol}//#{host}/Best-Sellers-Books/zgbs/books/#{id}/?_encoding=UTF8&pg=#{page}&ajax=1"
+        console.log "fetching url", url
+        $.get url, (data) ->
+          data = $(data)
+          substr = "/#{asin}/"
+          el = data.find("a[href*='#{substr}']")
+          if el
+            rank = num el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
+            console.log 'found rank', rank
+            li.append(" - ##{ rank }")
+            next(cb)
+          else if page < 5
+            page++
+            console.log 'trying page', page
+            next(fetch)
+          else
+            console.log 'asin not found'
+            rank = '> #100'
+            li.append(" - ##{ rank }")
+            next(cb)
+      fetch()
+
+    , ->
+      console.log 'done'
+      catTableButton.detach()
+
+
+
+
+
+
 
