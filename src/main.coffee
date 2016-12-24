@@ -265,7 +265,6 @@ $ ->
       idToRank[id] = rank
 
     categories = categories.parent()
-    return
     categories
       .empty()
       .css(textAlign: 'left')
