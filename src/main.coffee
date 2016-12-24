@@ -290,7 +290,7 @@ $ ->
           data = $(data)
           substr = "/#{asin}/"
           el = data.find("a[href*='#{substr}']")
-          if el
+          if el.length
             rank = num el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
             console.log 'found rank', rank
             li.append(" - ##{ rank }")
@@ -301,7 +301,7 @@ $ ->
             next(fetch)
           else
             console.log 'asin not found'
-            rank = '> #100'
+            rank = '>100'
             li.append(" - ##{ rank }")
             next(cb)
       fetch()
