@@ -133,6 +133,8 @@ $ ->
       categories = el.find('ul.zg_hrsr')
 
   allCategories = $('h2:contains("Similar Items by Category") ~ .content ul')
+  if not allCategories.length
+    allCategories = $('h2:contains("similar items by category") ~ .content ul')
 
   asin = $('input[name="ASIN.0"]').val()
   rank = num d['Amazon Best Sellers Rank']

@@ -179,6 +179,9 @@
       }
     });
     allCategories = $('h2:contains("Similar Items by Category") ~ .content ul');
+    if (!allCategories.length) {
+      allCategories = $('h2:contains("similar items by category") ~ .content ul');
+    }
     asin = $('input[name="ASIN.0"]').val();
     rank = num(d['Amazon Best Sellers Rank']);
     tier = rank < 10 ? '1' : rank < 100 ? '2' : rank < 1000 ? 'III' : rank < 10000 ? 'IV' : rank < 100000 ? 'V' : 'VI';
