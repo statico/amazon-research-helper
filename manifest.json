@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Amazon Book Research Helper",
   "description": "Writing to market? This extension shows the most important information about a book right at the top of the page.",
-  "version": "1.0.6",
+  "version": "1.0.6.1",
   "author": "Terminal Publishing",
   "icons": { "128": "assets/icon.png" },
   "content_scripts": [

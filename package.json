@@ -7,12 +7,14 @@
   "scripts": {
     "watchjs": "coffee -w -o build src",
     "watchcss": "stylus -w -o build src",
-    "release": "rm -f /tmp/ext.zip && zip -r /tmp/ext.zip manifest.json third-party build assets/icon.png && ls -l /tmp/ext.zip"
+    "build": "bin/build",
+    "release": "bin/release"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "coffee-script": "1.*",
-    "stylus": "0.*"
+    "coffee-script": "1.12.2",
+    "stylus": "0.54.5",
+    "web-ext": "*"
   }
 }
