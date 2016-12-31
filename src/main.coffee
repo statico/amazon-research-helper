@@ -186,6 +186,7 @@ $ ->
   length = d['Print Length'] or d['Paperback'] or d['Hardcover']
   words = if length then num(length) * 250 else 0
   fileSize = d['File Size']
+  isEbook = Boolean fileSize
 
   if allCategories.length
     catTableButton = $('
@@ -230,6 +231,10 @@ $ ->
     '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
     ' - '
     "<a href='https://www.novelrank.com/asin/#{ asin }'>NovelRank</a>"
+    ' - '
+    "<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/##{rank},#{if isEbook then 1 else 0}'>KP</a>"
+    ' - '
+    "<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/##{rank},#{if isEbook then 1 else 0}'>TCK</a>"
     ' - '
     'Rating: ', ratingAvg
     ' - '

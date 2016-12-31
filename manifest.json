@@ -23,12 +23,24 @@
         "third-party/moment.min.js",
         "build/main.js"
       ]
+    },
+    {
+      "all_frames": true,
+      "matches": [ "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*" ],
+      "js": [ "third-party/jquery.js", "build/kp.js" ]
+    },
+    {
+      "all_frames": true,
+      "matches": [ "http://www.tckpublishing.com/amazon-book-sales-calculator/*" ],
+      "js": [ "third-party/jquery.js", "build/tck.js" ]
     }
   ],
   "permissions": [
     "*://*.amazon.com/*",
     "*://*.amazon.ca/*",
     "*://*.amazon.com.au/*",
-    "*://*.amazon.co.uk/*"
+    "*://*.amazon.co.uk/*",
+    "http://www.tckpublishing.com/amazon-book-sales-calculator/*",
+    "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*"
   ]
 }
