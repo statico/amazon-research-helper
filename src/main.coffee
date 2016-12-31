@@ -149,6 +149,22 @@ $ ->
   if not author.length
     author = $('.author .a-link-normal').clone().attr(target: '_blank')
 
+  authorRank = $('<div/>').addClass('authorRank').hide()
+  authorExpander = $('<span class=expand/>')
+  do ->
+    {host, protocol} = document.location
+    url =  "#{protocol}//#{host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=#{asin}"
+    $.get url, (data) ->
+      els = $(data).find('.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank')
+      if els.length
+        authorRank.append els
+        link = $('<a href=#>see rank</a>')
+        authorExpander.append ' (', link, ')'
+        link.on 'click', (e) ->
+          e.preventDefault()
+          authorRank.show()
+          authorExpander.hide()
+
   ratingAvg = num(
     $('#summaryStars a.product-reviews-link').attr('title') or
     $('#revFMSR a').attr('title')
@@ -193,6 +209,7 @@ $ ->
         return publisher
     ' - '
     'Author: ', $('<span class=authors/>').append(author)
+    authorExpander
     if length
       " - Length: #{length} (~#{words.toLocaleString()} words)" + \
       '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
@@ -200,7 +217,8 @@ $ ->
     ' - '
     'ASIN: ', asin
     '<br/>' # ------------
-    'Rank: #', rank.toLocaleString()
+    authorRank
+    'Book Rank: #', rank.toLocaleString()
     ' - '
     'Tier ', tier
     '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
