@@ -298,40 +298,49 @@ $ ->
 
     next = (fn) -> setTimeout fn, 500
 
-    forEachSeries categories.find('li'), (li, cb) ->
-      li = $(li)
-      id = Number li.find('a:last').attr('href').match(/node=(\d+)/)?[1]
-      console.log "looking up book in category #{id}..."
-      if id of idToRank
-        console.log "already had rank #{idToRank[id]} in preview."
-        li.append(" - ##{ idToRank[id] }")
-        return next(cb)
+    forEachSeries ['BS', 'HNR'], (mode, outerCb) ->
+      forEachSeries categories.find('li'), (li, cb) ->
+        li = $(li)
+        id = Number li.find('a[href^="/"]:last').attr('href').match(/node=(\d+)/)?[1]
+        console.log "looking up book in #{mode} category #{id}..."
+        if mode is 'BS'
+          label = """<a href="https://www.amazon.com/gp/bestsellers/books/#{id}" title="Best Sellers rank">BS</a>"""
+        else
+          label = """<a href="https://www.amazon.com/gp/new-releases/books/#{id}" title="Hot New Releases rank">HNR</a>"""
+        if id of idToRank and mode is 'BS'
+          console.log "already had rank #{idToRank[id]} in preview."
+          li.append ' - ', label, " ##{idToRank[id]}"
+          return next(cb)
 
-      page = 1
-      {host, protocol} = document.location
-      fetch = ->
-        url =  "#{protocol}//#{host}/Best-Sellers-Books/zgbs/books/#{id}/?_encoding=UTF8&pg=#{page}&ajax=1"
-        console.log "fetching url", url
-        $.get url, (data) ->
-          data = $(data)
-          substr = "/#{asin}/"
-          el = data.find("a[href*='#{substr}']")
-          if el.length
-            rank = num el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
-            console.log 'found rank', rank
-            li.append(" - ##{ rank }")
-            next(cb)
-          else if page < 5
-            page++
-            console.log 'trying page', page
-            next(fetch)
+        page = 1
+        {host, protocol} = document.location
+        fetch = ->
+          if mode is 'BS'
+            url =  "#{protocol}//#{host}/Best-Sellers-Books/zgbs/books/#{id}/?_encoding=UTF8&pg=#{page}&ajax=1"
           else
-            console.log 'asin not found'
-            rank = '>100'
-            li.append(" - ##{ rank }")
-            next(cb)
-      fetch()
+            url =  "#{protocol}//#{host}/gp/new-releases/digital-text/#{id}/?ie=UTF8&pg=#{page}&ajax=1"
+          console.log "fetching url", url
+          $.get url, (data) ->
+            data = $(data)
+            substr = "/#{asin}/"
+            el = data.find("a[href*='#{substr}']")
+            if el.length
+              rank = num el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
+              console.log 'found rank in', mode, rank
+              li.append ' - ', label, " ##{rank}"
+              next(cb)
+            else if page < 5
+              page++
+              console.log 'trying page', page
+              next(fetch)
+            else
+              console.log 'asin not found'
+              rank = '>100'
+              li.append ' - ', label, " ##{rank}"
+              next(cb)
+        fetch()
 
+      , outerCb
     , ->
       console.log 'done'
       catTableButton.detach()
