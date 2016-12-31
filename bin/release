@@ -4,7 +4,7 @@ npm run -s build
 
 rm -rvf web-ext-artifacts dist*
 mkdir -p dist
-cp -rv manifest.json third-party build assets/icon.png dist
+cp -rv manifest.json third-party build assets/icon*.png dist
 
 web-ext -s dist lint
 web-ext -s dist build
