@@ -113,8 +113,9 @@ $ ->
   if not /Amazon Best(s| S)ellers Rank/.test $('body').text()
     return
 
-  num = (str) ->
-    m = str?.match(/(\d+[\d\.,]*)/)?[1]
+  num = (val) ->
+    return val if typeof val is 'number'
+    m = val?.match(/(\d+[\d\.,]*)/)?[1]
     m = m?.replace?(/,/g, '')
     return Number(m)
 
@@ -167,9 +168,14 @@ $ ->
 
   ratingAvg = num(
     $('#summaryStars a.product-reviews-link').attr('title') or
-    $('#revFMSR a').attr('title')
+    $('#revFMSR a').attr('title') or
+    0
   )
-  ratingCount = num($('#acrCustomerReviewText').text() or $('#revSAFRLU').text())
+  ratingCount = num(
+    $('#acrCustomerReviewText').text() or
+    $('#revSAFRLU').text() or
+    0
+  )
 
   publisher = if d['Publisher'] then d['Publisher'].replace(/;.*/, '') else d['Sold by']
 
