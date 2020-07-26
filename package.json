@@ -4,12 +4,6 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "watchjs": "coffee -w -o build src",
-    "watchcss": "stylus -w -o build src",
-    "build": "bin/build",
-    "release": "bin/release"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {

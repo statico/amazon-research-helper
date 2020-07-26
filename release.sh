@@ -1,6 +1,11 @@
-#!/bin/bash -ex
+#!/usr/bin/env bash
 
-npm run -s build
+set -exo pipefail
+
+cd "$(dirname $0)"
+
+mkdir -p build
+cp -rv src/*.js src/*.css build
 
 rm -rvf web-ext-artifacts dist*
 mkdir -p dist/assets
