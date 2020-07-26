@@ -23,20 +23,18 @@
         "build/main.css"
       ],
       "js": [
-        "third-party/jquery.js",
-        "third-party/moment.min.js",
         "build/main.js"
       ]
     },
     {
       "all_frames": true,
       "matches": [ "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*" ],
-      "js": [ "third-party/jquery.js", "build/kp.js" ]
+      "js": [ "build/kp.js" ]
     },
     {
       "all_frames": true,
       "matches": [ "http://www.tckpublishing.com/amazon-book-sales-calculator/*" ],
-      "js": [ "third-party/jquery.js", "build/tck.js" ]
+      "js": [ "build/tck.js" ]
     }
   ],
   "permissions": [

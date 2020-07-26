@@ -9,7 +9,7 @@ cp -rv src/*.js src/*.css build
 
 rm -rvf web-ext-artifacts dist*
 mkdir -p dist/assets
-cp -rv manifest.json third-party build dist
+cp -rv manifest.json build dist
 cp -rv assets/icon*.png dist/assets
 
 web-ext -s dist lint
