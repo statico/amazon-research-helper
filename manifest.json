@@ -3,7 +3,7 @@
   "name": "Amazon Book Research Helper",
   "description": "Writing to market? This extension shows the most important information about a book right at the top of the page.",
   "version": "1.0.7.1",
-  "author": "Terminal Publishing",
+  "author": "Ian L.",
   "icons": {
     "128": "assets/icon128.png",
     "96": "assets/icon96.png",
@@ -19,22 +19,22 @@
         "*://*.amazon.co.uk/*"
       ],
       "run_at": "document_end",
-      "css": [
-        "build/main.css"
+      "css": ["main.css"],
+      "js": ["main.js"]
+    },
+    {
+      "all_frames": true,
+      "matches": [
+        "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*"
       ],
-      "js": [
-        "build/main.js"
-      ]
+      "js": ["kp.js"]
     },
     {
       "all_frames": true,
-      "matches": [ "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*" ],
-      "js": [ "build/kp.js" ]
-    },
-    {
-      "all_frames": true,
-      "matches": [ "http://www.tckpublishing.com/amazon-book-sales-calculator/*" ],
-      "js": [ "build/tck.js" ]
+      "matches": [
+        "http://www.tckpublishing.com/amazon-book-sales-calculator/*"
+      ],
+      "js": ["tck.js"]
     }
   ],
   "permissions": [

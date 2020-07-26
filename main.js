@@ -178,7 +178,9 @@ $(function () {
       }
     })
 
-  let allCategories = $('h2:contains("Similar Items by Category") ~ .content ul')
+  let allCategories = $(
+    'h2:contains("Similar Items by Category") ~ .content ul'
+  )
   if (!allCategories.length) {
     allCategories = $('h2:contains("similar items by category") ~ .content ul')
   }
@@ -198,7 +200,9 @@ $(function () {
       ? 'V'
       : 'VI'
 
-  let author = $('.author .contributorNameID').clone().attr({ target: '_blank' })
+  let author = $('.author .contributorNameID')
+    .clone()
+    .attr({ target: '_blank' })
   if (!author.length) {
     author = $('.author .a-link-normal').clone().attr({ target: '_blank' })
   }
@@ -209,7 +213,9 @@ $(function () {
     const { host, protocol } = document.location
     const url = `${protocol}//${host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=${asin}`
     return $.get(url, function (data) {
-      const els = $(data).find('.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank')
+      const els = $(data).find(
+        '.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank'
+      )
       if (els.length) {
         authorRank.append(els)
         const link = $('<a href=#>see rank</a>')
@@ -224,13 +230,20 @@ $(function () {
   })()
 
   const ratingAvg = num(
-    $('#summaryStars a.product-reviews-link').attr('title') || $('#revFMSR a').attr('title') || 0
+    $('#summaryStars a.product-reviews-link').attr('title') ||
+      $('#revFMSR a').attr('title') ||
+      0
   )
-  const ratingCount = num($('#acrCustomerReviewText').text() || $('#revSAFRLU').text() || 0)
+  const ratingCount = num(
+    $('#acrCustomerReviewText').text() || $('#revSAFRLU').text() || 0
+  )
 
-  const publisher = d['Publisher'] ? d['Publisher'].replace(/;.*/, '') : d['Sold by']
+  const publisher = d['Publisher']
+    ? d['Publisher'].replace(/;.*/, '')
+    : d['Sold by']
 
-  const pubDateRaw = d['Publication Date'] || d['Publisher'].match(/\((.*)\)/)[1]
+  const pubDateRaw =
+    d['Publication Date'] || d['Publisher'].match(/\((.*)\)/)[1]
   const pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
   const age = moment.duration(moment().diff(pubDate))
 
@@ -241,20 +254,20 @@ $(function () {
 
   if (allCategories.length) {
     catTableButton = $(`\
-<span class="a-button a-button-small"> \
-<span class="a-button-inner"> \
-<span class="a-button-text a-text-center">Expand ▼</span> \
-</span> \
-</span>\
-`)
+      <span class="a-button a-button-small"> \
+      <span class="a-button-inner"> \
+      <span class="a-button-text a-text-center">Expand ▼</span> \
+      </span> \
+      </span>\
+      `)
   } else {
     catTableButton = $(`\
-<span class="a-button a-button-small a-button-disabled"> \
-<span class="a-button-inner"> \
-<span class="a-button-text a-text-center">No Additional Categories</span> \
-</span> \
-</span>\
-`)
+      <span class="a-button a-button-small a-button-disabled"> \
+      <span class="a-button-inner"> \
+      <span class="a-button-text a-text-center">No Additional Categories</span> \
+      </span> \
+      </span>\
+      `)
   }
 
   const info = $('<div id="amazon-product-info-ext"/>')
@@ -340,21 +353,21 @@ $(function () {
     let id
     catTableButton = catTableButton.parent()
     catTableButton.html(`\
-<div class="sk-fading-circle">
-  <div class="sk-circle1 sk-circle"></div>
-  <div class="sk-circle2 sk-circle"></div>
-  <div class="sk-circle3 sk-circle"></div>
-  <div class="sk-circle4 sk-circle"></div>
-  <div class="sk-circle5 sk-circle"></div>
-  <div class="sk-circle6 sk-circle"></div>
-  <div class="sk-circle7 sk-circle"></div>
-  <div class="sk-circle8 sk-circle"></div>
-  <div class="sk-circle9 sk-circle"></div>
-  <div class="sk-circle10 sk-circle"></div>
-  <div class="sk-circle11 sk-circle"></div>
-  <div class="sk-circle12 sk-circle"></div>
-</div>\
-`)
+    <div class="sk-fading-circle">
+      <div class="sk-circle1 sk-circle"></div>
+      <div class="sk-circle2 sk-circle"></div>
+      <div class="sk-circle3 sk-circle"></div>
+      <div class="sk-circle4 sk-circle"></div>
+      <div class="sk-circle5 sk-circle"></div>
+      <div class="sk-circle6 sk-circle"></div>
+      <div class="sk-circle7 sk-circle"></div>
+      <div class="sk-circle8 sk-circle"></div>
+      <div class="sk-circle9 sk-circle"></div>
+      <div class="sk-circle10 sk-circle"></div>
+      <div class="sk-circle11 sk-circle"></div>
+      <div class="sk-circle12 sk-circle"></div>
+    </div>\
+    `)
 
     const idToRank = {}
     for (let li of Array.from($(categories).find('li'))) {
@@ -368,7 +381,10 @@ $(function () {
     }
 
     categories = categories.parent()
-    categories.empty().css({ textAlign: 'left' }).append(allCategories.clone().addClass('zg_hrsr'))
+    categories
+      .empty()
+      .css({ textAlign: 'left' })
+      .append(allCategories.clone().addClass('zg_hrsr'))
 
     const next = fn => setTimeout(fn, 500)
 
@@ -413,7 +429,9 @@ $(function () {
                 const substr = `/${asin}/`
                 const el = data.find(`a[href*='${substr}']`)
                 if (el.length) {
-                  rank = num(el.parents('.zg_itemImmersion').find('.zg_rankDiv').text())
+                  rank = num(
+                    el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
+                  )
                   console.log('found rank in', mode, rank)
                   li.append(' - ', label, ` #${rank}`)
                   return next(cb)
