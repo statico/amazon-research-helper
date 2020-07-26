@@ -1,27 +1,28 @@
-var $ = jQuery.noConflict()
+/*
+ * decaffeinate suggestions:
+ * DS101: Remove unnecessary use of Array.from
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = jQuery.noConflict()
 
-var hash, isEbook, rank, ref
+$(function () {
+  const { hash } = document.location
+  if (!/,/.test(hash)) {
+    return
+  }
+  let [rank, isEbook] = Array.from(hash.substr(1).split(','))
+  isEbook = Boolean(Number(isEbook))
 
-hash = document.location.hash
-if (!/,/.test(hash)) {
-  return
-}
+  $('#rank-input').val(rank)
 
-;(ref = hash.substr(1).split(',')), (rank = ref[0]), (isEbook = ref[1])
-isEbook = Boolean(Number(isEbook))
+  if (isEbook) {
+    $('#view-kindle .toggle-btn:eq(0)').click()
+  } else {
+    $('#view-kindle .toggle-btn:eq(1)').click()
+  }
 
-$('#rank-input').val(rank)
-if (isEbook) {
-  $('#view-kindle .toggle-btn:eq(0)').click()
-} else {
-  $('#view-kindle .toggle-btn:eq(1)').click()
-}
+  $('#press').click()
 
-$('#press').click()
-
-return $('html, body').animate(
-  {
-    scrollTop: $('#mainbg .screen').offset().top
-  },
-  0
-)
+  return $('html, body').animate({ scrollTop: $('#mainbg .screen').offset().top }, 0)
+})
