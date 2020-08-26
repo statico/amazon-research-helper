@@ -1,156 +1,10 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-// async {{{1
-
-let barrier = function (count, finalCallback) {
-  if (count === 0) {
-    return finalCallback()
-  }
-  return function () {
-    count--
-    if (count === 0) {
-      return finalCallback()
-    }
-  }
-}
-
-const series = function (steps, finalCallback) {
-  let index = 0
-
-  var processNextStep = function (lastArgs) {
-    if (lastArgs == null) {
-      lastArgs = []
-    }
-    if (steps[index] == null) {
-      const finalArgs = [null].concat(lastArgs) // (err, arg1, arg2, ...)
-      finalCallback?.apply(null, finalArgs)
-      return
-    }
-
-    const callback = function (err, ...args) {
-      if (err != null) {
-        finalCallback?.(err)
-      } else {
-        processNextStep(args)
-      }
-    }
-
-    const nextArgs = lastArgs.concat(callback) // (arg1, arg2, ..., cb)
-    steps[index++].apply(null, nextArgs)
-  }
-
-  processNextStep()
-}
-
-const parallel = function (steps, finalCallback) {
-  if (steps.length === 0) {
-    finalCallback?.(null)
+const main = () => {
+  const bodyText = document.body.innerText
+  if (!/Amazon Best(s| S)ellers Rank/.test(bodyText)) {
     return
   }
 
-  const errors = []
-  let count = steps.length
-  barrier = function (err) {
-    if (err != null && count >= 0) {
-      count = -1
-      finalCallback?.(err)
-    } else {
-      count--
-      if (count === 0) {
-        finalCallback?.(null)
-      }
-    }
-  }
-
-  for (let step of Array.from(steps)) {
-    step(barrier)
-  }
-}
-
-const aWhile = function (condition, iterator, finalCallback) {
-  var process = function () {
-    if (!condition()) {
-      finalCallback?.(null)
-      return
-    }
-    const callback = function (err) {
-      if (err != null) {
-        finalCallback?.(err)
-      } else {
-        process()
-      }
-    }
-    iterator(callback)
-  }
-
-  process()
-}
-
-const forEachSeries = function (array, iterator, finalCallback) {
-  let index = 0
-  const { length } = array
-  const condition = () => index < length
-  const arrayIterator = function (cb) {
-    iterator(array[index++], cb)
-  }
-  aWhile(condition, arrayIterator, finalCallback)
-}
-
-const forEachParallel = function (array, iterator, limit, finalCallback) {
-  let index
-  if (finalCallback == null) {
-    finalCallback = limit
-    limit = Infinity
-  }
-  if (!array.length) {
-    return finalCallback(null)
-  }
-
-  const errors = []
-  let inFlight = (index = 0)
-
-  const done = function (err) {
-    if (err) {
-      errors.push(err)
-    }
-    inFlight--
-    if (inFlight === 0 && index >= array.length) {
-      return finalCallback(errors.length ? errors : null)
-    } else {
-      return next()
-    }
-  }
-
-  var next = () =>
-    (() => {
-      const result = []
-      while (inFlight < limit && index < array.length) {
-        inFlight++
-        result.push(iterator(array[index++], done))
-      }
-      return result
-    })()
-
-  next()
-}
-
-// }}}
-
-const $ = jQuery.noConflict()
-
-$(function () {
-  let catTableButton
-  if (!/Amazon Best(s| S)ellers Rank/.test($('body').text())) {
-    return
-  }
-
-  const num = function (val) {
+  const toNumber = function (val) {
     if (typeof val === 'number') {
       return val
     }
@@ -160,22 +14,24 @@ $(function () {
   }
 
   const d = {}
-  let categories = $()
-  $('#productDetailsTable, #detail_bullets_id')
-    .find('.content > ul > li')
-    .each(function () {
-      let key = $(this).find('b:eq(0)').text().replace(/:$/, '').trim()
-      const el = $(this).clone()
-      el.find('b:eq(0)').remove()
-      const val = el.text().trim()
-      if (key === 'Amazon Bestsellers Rank') {
-        key = 'Amazon Best Sellers Rank'
-      }
-      d[key] = val
-      //console.log JSON.stringify(key), '=', val.replace(/\s+/g, ' ') # XXX
-      if (key === 'Amazon Best Sellers Rank') {
-        return (categories = el.find('ul.zg_hrsr'))
-      }
+  let categories = []
+  document
+    .querySelectorAll('#productDetailsTable, #detail_bullets_id')
+    .forEach((container) => {
+      container.querySelectorAll('.content > ul > li').forEach((el) => {
+        let key = el.querySelector('b').replace(/:$/, '').trim()
+
+        // Normalize amazon.co.uk
+        if (key === 'Amazon Bestsellers Rank') {
+          key = 'Amazon Best Sellers Rank'
+        }
+
+        d[key] = el.innerText.replace(/^.*?:\s*/, '')
+
+        if (key === 'Amazon Best Sellers Rank') {
+          return (categories = el.querySelectorAll('ul.zg_hrsr'))
+        }
+      })
     })
 
   let allCategories = $(
@@ -186,7 +42,7 @@ $(function () {
   }
 
   const asin = $('input[name="ASIN.0"]').val()
-  let rank = num(d['Amazon Best Sellers Rank'])
+  let rank = toNumber(d['Amazon Best Sellers Rank'])
   const tier =
     rank < 10
       ? '1'
@@ -207,9 +63,10 @@ $(function () {
     author = $('.author .a-link-normal').clone().attr({ target: '_blank' })
   }
 
+  let catTableButton
+
   const authorRank = $('<div/>').addClass('authorRank').hide()
-  const authorExpander = $('<span class=expand/>')
-  ;(function () {
+  const authorExpander = $('<span class=expand/>')(function () {
     const { host, protocol } = document.location
     const url = `${protocol}//${host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=${asin}`
     return $.get(url, function (data) {
@@ -229,12 +86,12 @@ $(function () {
     })
   })()
 
-  const ratingAvg = num(
+  const ratingAvg = toNumber(
     $('#summaryStars a.product-reviews-link').attr('title') ||
       $('#revFMSR a').attr('title') ||
       0
   )
-  const ratingCount = num(
+  const ratingCount = toNumber(
     $('#acrCustomerReviewText').text() || $('#revSAFRLU').text() || 0
   )
 
@@ -248,7 +105,7 @@ $(function () {
   const age = moment.duration(moment().diff(pubDate))
 
   const length = d['Print Length'] || d['Paperback'] || d['Hardcover']
-  const words = length ? num(length) * 250 : 0
+  const words = length ? toNumber(length) * 250 : 0
   const fileSize = d['File Size']
   const isEbook = Boolean(fileSize)
 
@@ -276,13 +133,9 @@ $(function () {
     `<b>${$('#title').text()}</b>`,
     '<br/>', // ------------
     'Publisher: ',
-    (function () {
-      if (/Amazon\s+Digital\s+Services\s+LLC/.test(publisher)) {
-        return '<span class=hi>Self-Published</span>'
-      } else {
-        return publisher
-      }
-    })(),
+    /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
+      ? '<span class=hi>Self-Published</span>'
+      : publisher,
     ' - ',
     'Author: ',
     $('<span class=authors/>').append(author),
@@ -330,14 +183,14 @@ $(function () {
     $('<div class="cat-table"/>').append(
       $('<div class="cat-table-cell"/>').append(categories),
       $('<div class="cat-table-cell"/>').append(catTableButton)
-    )
+    ),
   ])
 
   const close = $('<div/>')
   close.css({
     position: 'absolute',
     top: '10px',
-    right: '10px'
+    right: '10px',
   })
   close.appendTo(info)
 
@@ -352,30 +205,15 @@ $(function () {
   const fetchAllCategories = function () {
     let id
     catTableButton = catTableButton.parent()
-    catTableButton.html(`\
-    <div class="sk-fading-circle">
-      <div class="sk-circle1 sk-circle"></div>
-      <div class="sk-circle2 sk-circle"></div>
-      <div class="sk-circle3 sk-circle"></div>
-      <div class="sk-circle4 sk-circle"></div>
-      <div class="sk-circle5 sk-circle"></div>
-      <div class="sk-circle6 sk-circle"></div>
-      <div class="sk-circle7 sk-circle"></div>
-      <div class="sk-circle8 sk-circle"></div>
-      <div class="sk-circle9 sk-circle"></div>
-      <div class="sk-circle10 sk-circle"></div>
-      <div class="sk-circle11 sk-circle"></div>
-      <div class="sk-circle12 sk-circle"></div>
-    </div>\
-    `)
+    catTableButton.html('Loading...')
 
     const idToRank = {}
     for (let li of Array.from($(categories).find('li'))) {
       li = $(li)
-      rank = num(li.find('.zg_hrsr_rank').text())
+      rank = toNumber(li.find('.zg_hrsr_rank').text())
       const crumb = li.find('.zg_hrsr_ladder')
       $(crumb.contents())[0]?.remove()
-      id = num(li.find('a:last').attr('href'))
+      id = toNumber(li.find('a:last').attr('href'))
       //console.log 'XXX', id, rank, crumb.text()
       idToRank[id] = rank
     }
@@ -386,9 +224,9 @@ $(function () {
       .css({ textAlign: 'left' })
       .append(allCategories.clone().addClass('zg_hrsr'))
 
-    const next = fn => setTimeout(fn, 500)
+    const next = (fn) => setTimeout(fn, 500)
 
-    return forEachSeries(
+    forEachSeries(
       ['BS', 'HNR'],
       (mode, outerCb) =>
         forEachSeries(
@@ -427,10 +265,10 @@ $(function () {
               return $.get(url, function (data) {
                 data = $(data)
                 const substr = `/${asin}/`
-                const el = data.find(`a[href*='${substr}']`)
-                if (el.length) {
-                  rank = num(
-                    el.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
+                const el2 = data.find(`a[href*='${substr}']`)
+                if (el2.length) {
+                  rank = toNumber(
+                    el2.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
                   )
                   console.log('found rank in', mode, rank)
                   li.append(' - ', label, ` #${rank}`)
@@ -454,12 +292,22 @@ $(function () {
         ),
       function () {
         console.log('done')
-        return catTableButton.detach()
+        catTableButton.detach()
       }
     )
   }
 
   if (allCategories.length) {
-    return catTableButton.on('click', fetchAllCategories)
+    catTableButton.on('click', fetchAllCategories)
   }
-})
+}
+
+try {
+  main()
+} catch (err) {
+  console.error(
+    '%camazon-research-helper error',
+    'font-size: 24px; font-weight: bold'
+  )
+  console.error(err)
+}

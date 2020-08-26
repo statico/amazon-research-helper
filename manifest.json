@@ -11,7 +11,6 @@
   },
   "content_scripts": [
     {
-      "all_frames": true,
       "matches": [
         "*://*.amazon.com/*",
         "*://*.amazon.ca/*",
@@ -19,18 +18,16 @@
         "*://*.amazon.co.uk/*"
       ],
       "run_at": "document_end",
-      "css": ["main.css"],
-      "js": ["main.js"]
+      "css": ["amazon.css"],
+      "js": ["amazon.js"]
     },
     {
-      "all_frames": true,
       "matches": [
         "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*"
       ],
       "js": ["kp.js"]
     },
     {
-      "all_frames": true,
       "matches": [
         "http://www.tckpublishing.com/amazon-book-sales-calculator/*"
       ],
