@@ -1,4 +1,4 @@
-const debug = false
+const debug = true
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -41,34 +41,34 @@ const toNumber = function (val) {
 
 const main = () => {
   const bodyText = document.body.innerText
-  if (!/Amazon Best(s| S)ellers Rank/.test(bodyText)) {
+  if (!/Amazon Best(s| S)ellers Rank|Best-sellers rank/.test(bodyText)) {
     return
   }
 
   const info = {}
   let categories = []
-  document
-    .querySelectorAll('#productDetailsTable, #detail_bullets_id')
-    .forEach((container) => {
-      container.querySelectorAll('.content > ul > li').forEach((el) => {
-        let keyEl = el.querySelector('b')
-        if (!keyEl) return
-        let key = keyEl.innerText.replace(/:$/, '').trim()
+  let bullets = [
+    ...$$('#productDetailsTable .content > ul > li'),
+    ...$$('#detailBullets_feature_div li'),
+  ]
+  bullets.forEach((el) => {
+    let keyEl = el.querySelector('b') || el.querySelector('.a-text-bold')
+    if (!keyEl) return
+    let key = keyEl.innerText.replace(/\s*:\s*$/, '').trim()
 
-        // Normalize amazon.co.uk
-        if (key === 'Amazon Bestsellers Rank') {
-          key = 'Amazon Best Sellers Rank'
-        }
+    // Normalize amazon.co.uk
+    if (key === 'Amazon Bestsellers Rank') {
+      key = 'Amazon Best Sellers Rank'
+    }
 
-        const val = el.innerText.replace(/^.*?:\s*/, '')
-        info[key] = val
-        debug(`Detail key "${key}": "${val}"`)
+    const val = el.innerText.replace(/^.*?:\s*/, '')
+    info[key] = val
+    debug(`Detail key "${key}": "${val}"`)
 
-        if (key === 'Amazon Best Sellers Rank') {
-          return (categories = el.querySelectorAll('ul.zg_hrsr'))
-        }
-      })
-    })
+    if (key === 'Amazon Best Sellers Rank') {
+      return (categories = el.querySelectorAll('ul.zg_hrsr'))
+    }
+  })
 
   const asin = info['ASIN']
   let rank = toNumber(info['Amazon Best Sellers Rank'])
@@ -162,72 +162,74 @@ const main = () => {
   const fileSize = info['File Size']
   const isEbook = Boolean(fileSize)
 
-  const helperEl = build(
-    '<div id="amazon-product-info-ext" style="margin-bottom:10px"/>',
-    [
-      build(`<b>${$('#title').innerText}</b>`),
-      build('<br/>'), // ------------
-      'Publisher: ',
-      build(
-        /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
-          ? '<span class=hi>Self-Published</span>'
-          : publisher
-      ),
-      ' - ',
-      'Author: ',
-      build('<span class="authors"/>', [author]),
-      authorExpander,
-      length
-        ? build(
-            `&nbsp;- Length: ${length} (~${words.toLocaleString()} words)` +
-              '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
-          )
-        : '',
-      fileSize ? ` - Size: ${fileSize}` : '',
-      ' - ',
-      'ASIN: ',
-      asin,
-      build('<br/>'), // ------------
-      authorRank,
-      'Book Rank: #',
-      rank.toLocaleString(),
-      ' - ',
-      'Tier ',
-      tier,
-      build(
-        '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
-      ),
-      ' - ',
-      build(
-        `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
-          isEbook ? 1 : 0
-        }'>KP</a>`
-      ),
-      ' - ',
-      build(
-        `<a href='https://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
-          isEbook ? 1 : 0
-        }'>TCK</a>`
-      ),
-      ' - ',
-      'Rating: ',
-      ratingAvg,
-      ' - ',
-      'Reviews: ',
-      build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
-      ' - ',
-      'Age: ',
-      `${Math.round(ageInWeeks)} weeks`,
-      ' - ',
-      'Rvws/Wk: ',
-      Number(ratingCount / ageInWeeks).toFixed(2),
-      build('<br/>'), // ------------
-      build('<div class="cat-table"/>', [
-        build('<div class="cat-table-cell"/>', categories),
-      ]),
-    ]
-  )
+  const helperEl = build('<div id="amazon-product-info-ext"/>', [
+    build(`<b>${$('#title').innerText}</b>`),
+    build('<br/>'), // ------------
+    'Publisher: ',
+    build(
+      /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
+        ? '<span class=hi>Self-Published</span>'
+        : publisher
+    ),
+    ' - ',
+    'Author: ',
+    build('<span class="authors"/>', [author]),
+    authorExpander,
+    length
+      ? build(
+          `&nbsp;- Length: ${length} (~${words.toLocaleString()} words)` +
+            '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
+        )
+      : '',
+    fileSize ? ` - Size: ${fileSize}` : '',
+    ' - ',
+    'ASIN: ',
+    asin,
+    build('<br/>'), // ------------
+    authorRank,
+    'Book Rank: #',
+    rank.toLocaleString(),
+    ' - ',
+    'Tier ',
+    tier,
+    build(
+      '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
+    ),
+    ' - ',
+    build(
+      `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
+        isEbook ? 1 : 0
+      }'>KP</a>`
+    ),
+    ' - ',
+    build(
+      `<a href='https://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
+        isEbook ? 1 : 0
+      }'>TCK</a>`
+    ),
+    ' - ',
+    'Rating: ',
+    ratingAvg,
+    ' - ',
+    'Reviews: ',
+    build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
+    ' - ',
+    'Age: ',
+    `${Math.round(ageInWeeks)} weeks`,
+    ' - ',
+    'Rvws/Wk: ',
+    Number(ratingCount / ageInWeeks).toFixed(2),
+    build('<br/>'), // ------------
+    build('<div class="cat-table"/>', [
+      build('<div class="cat-table-cell"/>', categories),
+    ]),
+  ])
   $('header').appendChild(helperEl)
+
+  // Fix for amazon.co.uk
+  if ($('header.nav-flex')) {
+    $('header.nav-flex').style.flexDirection = 'column'
+  }
 
   const close = build(
     '<div style="position: absolute; top: 10px; right: 10px"/>'
