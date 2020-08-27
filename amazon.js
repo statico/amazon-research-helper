@@ -91,8 +91,6 @@ const main = () => {
   }
   author.setAttribute('target', '_blank')
 
-  let catTableButton
-
   const authorRank = build(`<div class="authorRank" style="display:none">`)
 
   const authorExpander = build(`<span class="expand">`)
@@ -207,7 +205,7 @@ const main = () => {
       ),
       ' - ',
       build(
-        `<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
+        `<a href='https://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
           isEbook ? 1 : 0
         }'>TCK</a>`
       ),
