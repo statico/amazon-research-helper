@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -17,7 +17,6 @@ const parseHTML = function (str) {
 
 const build = (html, children) => {
   const container = parseHTML(html)[0]
-  console.log('XXX', html, container, children)
   if (children)
     Array.from(children)
       .map((el) =>
@@ -71,14 +70,6 @@ const main = () => {
       })
     })
 
-  let allCategories = [] // XXXXXXXXXXXXXXXXXx
-  // let allCategories = $$(
-  //   'h2:contains("Similar Items by Category") ~ .content ul'
-  // )
-  // if (!allCategories.length) {
-  //   allCategories = $$('h2:contains("similar items by category") ~ .content ul')
-  // }
-
   const asin = info['ASIN']
   let rank = toNumber(info['Amazon Best Sellers Rank'])
   const tier =
@@ -112,7 +103,8 @@ const main = () => {
     fetch(url)
       .then((response) => response.text())
       .then((data) => {
-        const doc = parseHTML(data)
+        const nodes = parseHTML(data)
+        const doc = nodes[0].parentNode
         const els = doc.querySelectorAll(
           '.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank'
         )
@@ -171,24 +163,6 @@ const main = () => {
   const words = length ? toNumber(length) * 250 : 0
   const fileSize = info['File Size']
   const isEbook = Boolean(fileSize)
-
-  if (allCategories.length) {
-    catTableButton = build(`
-      <span class="a-button a-button-small">
-        <span class="a-button-inner">
-          <span class="a-button-text a-text-center">Expand ▼</span>
-        </span>
-      </span>
-    `)
-  } else {
-    catTableButton = build(`
-      <span class="a-button a-button-small a-button-disabled"> 
-        <span class="a-button-inner"> 
-          <span class="a-button-text a-text-center">No Additional Categories</span> 
-        </span> 
-      </span>
-    `)
-  }
 
   const helperEl = build(
     '<div id="amazon-product-info-ext" style="margin-bottom:10px"/>',
@@ -252,7 +226,6 @@ const main = () => {
       build('<br/>'), // ------------
       build('<div class="cat-table"/>', [
         build('<div class="cat-table-cell"/>', categories),
-        build('<div class="cat-table-cell"/>', [catTableButton]),
       ]),
     ]
   )
@@ -269,105 +242,6 @@ const main = () => {
     helperEl.style.display = 'none'
   })
   close.appendChild(removeBtn)
-
-  // const fetchAllCategories = function () {
-  //   let id
-  //   catTableButton = catTableButton.parentElement
-  //   catTableButton.innerText = 'Loading...'
-
-  //   const idToRank = {}
-  //   for (let li of Array.from(categories.querySelectorAll('li'))) {
-  //     const f = li.querySelector.bind(li)
-  //     rank = toNumber(li.f('.zg_hrsr_rank').innerText)
-  //     const crumb = li.f('.zg_hrsr_ladder')
-  //     // $(crumb.contents())[0]?.remove() TODO XXXXXXXXXXXx
-  //     id = toNumber(li.f('a:last').getAttribute('href'))
-  //     idToRank[id] = rank
-  //   }
-
-  //   // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-  //   categories = categories.parent()
-  //   categories
-  //     .empty()
-  //     .css({ textAlign: 'left' })
-  //     .append(allCategories.clone().addClass('zg_hrsr'))
-
-  //   const next = (fn) => setTimeout(fn, 500)
-
-  //   forEachSeries(
-  //     ['BS', 'HNR'],
-  //     (mode, outerCb) =>
-  //       forEachSeries(
-  //         categories.find('li'),
-  //         function (li, cb) {
-  //           let label
-  //           li = $(li)
-  //           id = Number(
-  //             li
-  //               .find('a[href^="/"]:last')
-  //               .attr('href')
-  //               .match(/node=(\d+)/)?.[1]
-  //           )
-  //           console.log(`looking up book in ${mode} category ${id}...`)
-  //           if (mode === 'BS') {
-  //             label = `<a href="https://www.amazon.com/gp/bestsellers/books/${id}" title="Best Sellers rank">BS</a>`
-  //           } else {
-  //             label = `<a href="https://www.amazon.com/gp/new-releases/books/${id}" title="Hot New Releases rank">HNR</a>`
-  //           }
-  //           if (id in idToRank && mode === 'BS') {
-  //             console.log(`already had rank ${idToRank[id]} in preview.`)
-  //             li.append(' - ', label, ` #${idToRank[id]}`)
-  //             return next(cb)
-  //           }
-
-  //           let page = 1
-  //           const { host, protocol } = document.location
-  //           var fetch = function () {
-  //             let url
-  //             if (mode === 'BS') {
-  //               url = `${protocol}//${host}/Best-Sellers-Books/zgbs/books/${id}/?_encoding=UTF8&pg=${page}&ajax=1`
-  //             } else {
-  //               url = `${protocol}//${host}/gp/new-releases/digital-text/${id}/?ie=UTF8&pg=${page}&ajax=1`
-  //             }
-  //             console.log('fetching url', url)
-  //             return $.get(url, function (data) {
-  //               data = $(data)
-  //               const substr = `/${asin}/`
-  //               const el2 = data.find(`a[href*='${substr}']`)
-  //               if (el2.length) {
-  //                 rank = toNumber(
-  //                   el2.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
-  //                 )
-  //                 console.log('found rank in', mode, rank)
-  //                 li.append(' - ', label, ` #${rank}`)
-  //                 return next(cb)
-  //               } else if (page < 5) {
-  //                 page++
-  //                 console.log('trying page', page)
-  //                 return next(fetch)
-  //               } else {
-  //                 console.log('asin not found')
-  //                 rank = '>100'
-  //                 li.append(' - ', label, ` #${rank}`)
-  //                 return next(cb)
-  //               }
-  //             })
-  //           }
-  //           return fetch()
-  //         },
-
-  //         outerCb
-  //       ),
-  //     function () {
-  //       console.log('done')
-  //       catTableButton.detach()
-  //     }
-  //   )
-  // }
-
-  // if (allCategories.length) {
-  //   catTableButton.on('click', fetchAllCategories)
-  // }
 }
 
 try {
