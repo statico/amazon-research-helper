@@ -226,8 +226,6 @@ const main = () => {
         '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
       ),
       ' - ',
-      build(`<a href='https://www.novelrank.com/asin/${asin}'>NovelRank</a>`),
-      ' - ',
       build(
         `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
           isEbook ? 1 : 0
