@@ -1,32 +1,69 @@
+const debug = true
+  ? (...args) => {
+      console.log(
+        `%c${args.join(' ')}`,
+        'background-color: #a7f6fa; color: #111; padding: 2px;'
+      )
+    }
+  : () => {}
+
+const $ = document.querySelector.bind(document)
+const $$ = document.querySelectorAll.bind(document)
+
+const parseHTML = function (str) {
+  const doc = new DOMParser().parseFromString(str, 'text/html')
+  return Array.from(doc.body.childNodes)
+}
+
+const build = (html, children) => {
+  const container = parseHTML(html)[0]
+  console.log('XXX', html, container, children)
+  if (children)
+    Array.from(children)
+      .map((el) =>
+        typeof el === 'string'
+          ? document.createTextNode(el)
+          : typeof el === 'number'
+          ? document.createTextNode(String(el))
+          : el
+      )
+      .forEach((el) => container.appendChild(el))
+  return container
+}
+
+const toNumber = function (val) {
+  if (typeof val === 'number') {
+    return val
+  }
+  let m = val?.match(/(\d+[\d\.,]*)/)?.[1]
+  m = m?.replace?.(/,/g, '')
+  return Number(m)
+}
+
 const main = () => {
   const bodyText = document.body.innerText
   if (!/Amazon Best(s| S)ellers Rank/.test(bodyText)) {
     return
   }
 
-  const toNumber = function (val) {
-    if (typeof val === 'number') {
-      return val
-    }
-    let m = val?.match(/(\d+[\d\.,]*)/)?.[1]
-    m = m?.replace?.(/,/g, '')
-    return Number(m)
-  }
-
-  const d = {}
+  const info = {}
   let categories = []
   document
     .querySelectorAll('#productDetailsTable, #detail_bullets_id')
     .forEach((container) => {
       container.querySelectorAll('.content > ul > li').forEach((el) => {
-        let key = el.querySelector('b').replace(/:$/, '').trim()
+        let keyEl = el.querySelector('b')
+        if (!keyEl) return
+        let key = keyEl.innerText.replace(/:$/, '').trim()
 
         // Normalize amazon.co.uk
         if (key === 'Amazon Bestsellers Rank') {
           key = 'Amazon Best Sellers Rank'
         }
 
-        d[key] = el.innerText.replace(/^.*?:\s*/, '')
+        const val = el.innerText.replace(/^.*?:\s*/, '')
+        info[key] = val
+        debug(`Detail key "${key}": "${val}"`)
 
         if (key === 'Amazon Best Sellers Rank') {
           return (categories = el.querySelectorAll('ul.zg_hrsr'))
@@ -34,15 +71,16 @@ const main = () => {
       })
     })
 
-  let allCategories = $(
-    'h2:contains("Similar Items by Category") ~ .content ul'
-  )
-  if (!allCategories.length) {
-    allCategories = $('h2:contains("similar items by category") ~ .content ul')
-  }
+  let allCategories = [] // XXXXXXXXXXXXXXXXXx
+  // let allCategories = $$(
+  //   'h2:contains("Similar Items by Category") ~ .content ul'
+  // )
+  // if (!allCategories.length) {
+  //   allCategories = $$('h2:contains("similar items by category") ~ .content ul')
+  // }
 
-  const asin = $('input[name="ASIN.0"]').val()
-  let rank = toNumber(d['Amazon Best Sellers Rank'])
+  const asin = info['ASIN']
+  let rank = toNumber(info['Amazon Best Sellers Rank'])
   const tier =
     rank < 10
       ? '1'
@@ -56,250 +94,287 @@ const main = () => {
       ? 'V'
       : 'VI'
 
-  let author = $('.author .contributorNameID')
-    .clone()
-    .attr({ target: '_blank' })
+  let author = $('.author .contributorNameID').cloneNode(true)
   if (!author.length) {
-    author = $('.author .a-link-normal').clone().attr({ target: '_blank' })
+    author = $('.author .a-link-normal').cloneNode(true)
   }
+  author.setAttribute('target', '_blank')
 
   let catTableButton
 
-  const authorRank = $('<div/>').addClass('authorRank').hide()
-  const authorExpander = $('<span class=expand/>')(function () {
+  const authorRank = build(`<div class="authorRank" style="display:none">`)
+  // const authorRank = document.createElement('div')
+  // authorRank.classList.add('authorRank')
+  // authorRank.style.display = 'none'
+
+  const authorExpander = build(`<span class="expand">`)
+  // const authorExpander = document.createElement('span')
+  // authorExpander.classList.add('expand')
+  ;(() => {
     const { host, protocol } = document.location
     const url = `${protocol}//${host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=${asin}`
-    return $.get(url, function (data) {
-      const els = $(data).find(
-        '.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank'
-      )
-      if (els.length) {
-        authorRank.append(els)
-        const link = $('<a href=#>see rank</a>')
-        authorExpander.append(' (', link, ')')
-        return link.on('click', function (e) {
-          e.preventDefault()
-          authorRank.show()
-          return authorExpander.hide()
-        })
-      }
-    })
+    debug('Will fetch', url)
+    fetch(url)
+      .then((response) => response.text())
+      .then((data) => {
+        const doc = parseHTML(data)
+        const els = doc.querySelectorAll(
+          '.kindleAuthorRank .browseNodeRanks, .kindleAuthorRank .overallRank'
+        )
+        if (els.length) {
+          authorRank.append(els)
+          const link = build('<a href="#">see rank</a>')
+          // const link = document.createElement('a')
+          // link.innerText = 'see rank'
+          authorExpander.innerHTML += ' ('
+          authorExpander.append(link)
+          authorExpander.innerHTML += ')'
+          link.addEventListener('click', function (e) {
+            e.preventDefault()
+            authorRank.style.display = null
+            authorExpander.style.display = 'none'
+          })
+        }
+      })
   })()
 
+  const ratingAvgEl1 = $('#summaryStars a.product-reviews-link')
+  const ratingAvgEl2 = $('#revFMSR a')
   const ratingAvg = toNumber(
-    $('#summaryStars a.product-reviews-link').attr('title') ||
-      $('#revFMSR a').attr('title') ||
-      0
+    ratingAvgEl1
+      ? ratingAvgEl1.getAttribute('title')
+      : ratingAvgEl2
+      ? ratingAvgEl2.getAttribute('title')
+      : 0
   )
-  const ratingCount = toNumber(
-    $('#acrCustomerReviewText').text() || $('#revSAFRLU').text() || 0
-  )
+  debug('ratingAvg', ratingAvg)
 
-  const publisher = d['Publisher']
-    ? d['Publisher'].replace(/;.*/, '')
-    : d['Sold by']
+  const ratingCountEl1 = $('#acrCustomerReviewText')
+  const ratingCountEl2 = $('#revSAFRLU')
+  const ratingCount = toNumber(
+    ratingCountEl1
+      ? ratingCountEl1.innerText
+      : ratingCountEl2
+      ? ratingCountEl2.innerText
+      : 0
+  )
+  debug('ratingCount', ratingCount)
+
+  const publisher = info['Publisher']
+    ? info['Publisher'].replace(/;.*/, '')
+    : info['Sold by']
 
   const pubDateRaw =
-    d['Publication Date'] || d['Publisher'].match(/\((.*)\)/)[1]
-  const pubDate = moment(pubDateRaw, 'MMMM D, YYYY')
-  const age = moment.duration(moment().diff(pubDate))
+    info['Publication Date'] || info['Publisher'].match(/\((.*)\)/)[1]
+  debug('pubDateRaw', pubDateRaw)
+  const pubDate = new Date(pubDateRaw)
+  debug('pubDate', pubDate)
+  const diff = new Date() - new Date(pubDate)
+  const ageInWeeks = diff / 1000 / 60 / 60 / 24 / 7
 
-  const length = d['Print Length'] || d['Paperback'] || d['Hardcover']
+  const length = info['Print Length'] || info['Paperback'] || info['Hardcover']
   const words = length ? toNumber(length) * 250 : 0
-  const fileSize = d['File Size']
+  const fileSize = info['File Size']
   const isEbook = Boolean(fileSize)
 
   if (allCategories.length) {
-    catTableButton = $(`\
-      <span class="a-button a-button-small"> \
-      <span class="a-button-inner"> \
-      <span class="a-button-text a-text-center">Expand ▼</span> \
-      </span> \
-      </span>\
-      `)
+    catTableButton = build(`
+      <span class="a-button a-button-small">
+        <span class="a-button-inner">
+          <span class="a-button-text a-text-center">Expand ▼</span>
+        </span>
+      </span>
+    `)
   } else {
-    catTableButton = $(`\
-      <span class="a-button a-button-small a-button-disabled"> \
-      <span class="a-button-inner"> \
-      <span class="a-button-text a-text-center">No Additional Categories</span> \
-      </span> \
-      </span>\
-      `)
+    catTableButton = build(`
+      <span class="a-button a-button-small a-button-disabled"> 
+        <span class="a-button-inner"> 
+          <span class="a-button-text a-text-center">No Additional Categories</span> 
+        </span> 
+      </span>
+    `)
   }
 
-  const info = $('<div id="amazon-product-info-ext"/>')
-  info.appendTo('header')
-  info.append([
-    `<b>${$('#title').text()}</b>`,
-    '<br/>', // ------------
+  const helperEl = build('<div id="amazon-product-info-ext"/>', [
+    build(`<b>${$('#title').innerText}</b>`),
+    build('<br/>'), // ------------
     'Publisher: ',
-    /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
-      ? '<span class=hi>Self-Published</span>'
-      : publisher,
+    build(
+      /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
+        ? '<span class=hi>Self-Published</span>'
+        : publisher
+    ),
     ' - ',
     'Author: ',
-    $('<span class=authors/>').append(author),
+    build('<span class="authors"/>', [author]),
     authorExpander,
     length
-      ? ` - Length: ${length} (~${words.toLocaleString()} words)` +
-        '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
-      : undefined,
-    fileSize ? ` - Size: ${fileSize}` : undefined,
+      ? build(
+          ` - Length: ${length} (~${words.toLocaleString()} words)` +
+            '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
+        )
+      : '',
+    fileSize ? ` - Size: ${fileSize}` : '',
     ' - ',
     'ASIN: ',
     asin,
-    '<br/>', // ------------
+    build('<br/>'), // ------------
     authorRank,
     'Book Rank: #',
     rank.toLocaleString(),
     ' - ',
     'Tier ',
     tier,
-    '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>',
+    build(
+      '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
+    ),
     ' - ',
-    `<a href='https://www.novelrank.com/asin/${asin}'>NovelRank</a>`,
+    build(`<a href='https://www.novelrank.com/asin/${asin}'>NovelRank</a>`),
     ' - ',
-    `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
-      isEbook ? 1 : 0
-    }'>KP</a>`,
+    build(
+      `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
+        isEbook ? 1 : 0
+      }'>KP</a>`
+    ),
     ' - ',
-    `<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
-      isEbook ? 1 : 0
-    }'>TCK</a>`,
+    build(
+      `<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
+        isEbook ? 1 : 0
+      }'>TCK</a>`
+    ),
     ' - ',
     'Rating: ',
     ratingAvg,
     ' - ',
     'Reviews: ',
-    `<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`,
+    build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
     ' - ',
     'Age: ',
-    `${Math.round(age.asWeeks())} weeks`,
+    `${Math.round(ageInWeeks)} weeks`,
     ' - ',
     'Ratio: ',
-    Number(ratingCount / age.asWeeks()).toFixed(2),
-    '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>',
-    '<br/>', // ------------
-    $('<div class="cat-table"/>').append(
-      $('<div class="cat-table-cell"/>').append(categories),
-      $('<div class="cat-table-cell"/>').append(catTableButton)
+    Number(ratingCount / ageInWeeks).toFixed(2),
+    build(
+      '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>'
     ),
+    build('<br/>'), // ------------
+    build('<div class="cat-table"/>', [
+      build('<div class="cat-table-cell"/>', categories),
+      build('<div class="cat-table-cell"/>', [catTableButton]),
+    ]),
   ])
+  $('header').appendChild(helperEl)
 
-  const close = $('<div/>')
-  close.css({
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
+  const close = build(
+    '<div style="position: absolute; top: 10px; right: 10px"/>'
+  )
+  helperEl.appendChild(close)
+
+  const removeBtn = build('<a href="#" style="text-decoration:none">X</a>')
+  removeBtn.addEventListener('click', (event) => {
+    event.preventDefault()
+    helperEl.style.display = 'none'
   })
-  close.appendTo(info)
+  close.appendChild(removeBtn)
 
-  const removeBtn = $('<a href="#">X</a>')
-  removeBtn.css({ textDecoration: 'none' })
-  removeBtn.on('click', function (e) {
-    info.hide()
-    return e.preventDefault()
-  })
-  removeBtn.appendTo(close)
+  // const fetchAllCategories = function () {
+  //   let id
+  //   catTableButton = catTableButton.parentElement
+  //   catTableButton.innerText = 'Loading...'
 
-  const fetchAllCategories = function () {
-    let id
-    catTableButton = catTableButton.parent()
-    catTableButton.html('Loading...')
+  //   const idToRank = {}
+  //   for (let li of Array.from(categories.querySelectorAll('li'))) {
+  //     const f = li.querySelector.bind(li)
+  //     rank = toNumber(li.f('.zg_hrsr_rank').innerText)
+  //     const crumb = li.f('.zg_hrsr_ladder')
+  //     // $(crumb.contents())[0]?.remove() TODO XXXXXXXXXXXx
+  //     id = toNumber(li.f('a:last').getAttribute('href'))
+  //     idToRank[id] = rank
+  //   }
 
-    const idToRank = {}
-    for (let li of Array.from($(categories).find('li'))) {
-      li = $(li)
-      rank = toNumber(li.find('.zg_hrsr_rank').text())
-      const crumb = li.find('.zg_hrsr_ladder')
-      $(crumb.contents())[0]?.remove()
-      id = toNumber(li.find('a:last').attr('href'))
-      //console.log 'XXX', id, rank, crumb.text()
-      idToRank[id] = rank
-    }
+  //   // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+  //   categories = categories.parent()
+  //   categories
+  //     .empty()
+  //     .css({ textAlign: 'left' })
+  //     .append(allCategories.clone().addClass('zg_hrsr'))
 
-    categories = categories.parent()
-    categories
-      .empty()
-      .css({ textAlign: 'left' })
-      .append(allCategories.clone().addClass('zg_hrsr'))
+  //   const next = (fn) => setTimeout(fn, 500)
 
-    const next = (fn) => setTimeout(fn, 500)
+  //   forEachSeries(
+  //     ['BS', 'HNR'],
+  //     (mode, outerCb) =>
+  //       forEachSeries(
+  //         categories.find('li'),
+  //         function (li, cb) {
+  //           let label
+  //           li = $(li)
+  //           id = Number(
+  //             li
+  //               .find('a[href^="/"]:last')
+  //               .attr('href')
+  //               .match(/node=(\d+)/)?.[1]
+  //           )
+  //           console.log(`looking up book in ${mode} category ${id}...`)
+  //           if (mode === 'BS') {
+  //             label = `<a href="https://www.amazon.com/gp/bestsellers/books/${id}" title="Best Sellers rank">BS</a>`
+  //           } else {
+  //             label = `<a href="https://www.amazon.com/gp/new-releases/books/${id}" title="Hot New Releases rank">HNR</a>`
+  //           }
+  //           if (id in idToRank && mode === 'BS') {
+  //             console.log(`already had rank ${idToRank[id]} in preview.`)
+  //             li.append(' - ', label, ` #${idToRank[id]}`)
+  //             return next(cb)
+  //           }
 
-    forEachSeries(
-      ['BS', 'HNR'],
-      (mode, outerCb) =>
-        forEachSeries(
-          categories.find('li'),
-          function (li, cb) {
-            let label
-            li = $(li)
-            id = Number(
-              li
-                .find('a[href^="/"]:last')
-                .attr('href')
-                .match(/node=(\d+)/)?.[1]
-            )
-            console.log(`looking up book in ${mode} category ${id}...`)
-            if (mode === 'BS') {
-              label = `<a href="https://www.amazon.com/gp/bestsellers/books/${id}" title="Best Sellers rank">BS</a>`
-            } else {
-              label = `<a href="https://www.amazon.com/gp/new-releases/books/${id}" title="Hot New Releases rank">HNR</a>`
-            }
-            if (id in idToRank && mode === 'BS') {
-              console.log(`already had rank ${idToRank[id]} in preview.`)
-              li.append(' - ', label, ` #${idToRank[id]}`)
-              return next(cb)
-            }
+  //           let page = 1
+  //           const { host, protocol } = document.location
+  //           var fetch = function () {
+  //             let url
+  //             if (mode === 'BS') {
+  //               url = `${protocol}//${host}/Best-Sellers-Books/zgbs/books/${id}/?_encoding=UTF8&pg=${page}&ajax=1`
+  //             } else {
+  //               url = `${protocol}//${host}/gp/new-releases/digital-text/${id}/?ie=UTF8&pg=${page}&ajax=1`
+  //             }
+  //             console.log('fetching url', url)
+  //             return $.get(url, function (data) {
+  //               data = $(data)
+  //               const substr = `/${asin}/`
+  //               const el2 = data.find(`a[href*='${substr}']`)
+  //               if (el2.length) {
+  //                 rank = toNumber(
+  //                   el2.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
+  //                 )
+  //                 console.log('found rank in', mode, rank)
+  //                 li.append(' - ', label, ` #${rank}`)
+  //                 return next(cb)
+  //               } else if (page < 5) {
+  //                 page++
+  //                 console.log('trying page', page)
+  //                 return next(fetch)
+  //               } else {
+  //                 console.log('asin not found')
+  //                 rank = '>100'
+  //                 li.append(' - ', label, ` #${rank}`)
+  //                 return next(cb)
+  //               }
+  //             })
+  //           }
+  //           return fetch()
+  //         },
 
-            let page = 1
-            const { host, protocol } = document.location
-            var fetch = function () {
-              let url
-              if (mode === 'BS') {
-                url = `${protocol}//${host}/Best-Sellers-Books/zgbs/books/${id}/?_encoding=UTF8&pg=${page}&ajax=1`
-              } else {
-                url = `${protocol}//${host}/gp/new-releases/digital-text/${id}/?ie=UTF8&pg=${page}&ajax=1`
-              }
-              console.log('fetching url', url)
-              return $.get(url, function (data) {
-                data = $(data)
-                const substr = `/${asin}/`
-                const el2 = data.find(`a[href*='${substr}']`)
-                if (el2.length) {
-                  rank = toNumber(
-                    el2.parents('.zg_itemImmersion').find('.zg_rankDiv').text()
-                  )
-                  console.log('found rank in', mode, rank)
-                  li.append(' - ', label, ` #${rank}`)
-                  return next(cb)
-                } else if (page < 5) {
-                  page++
-                  console.log('trying page', page)
-                  return next(fetch)
-                } else {
-                  console.log('asin not found')
-                  rank = '>100'
-                  li.append(' - ', label, ` #${rank}`)
-                  return next(cb)
-                }
-              })
-            }
-            return fetch()
-          },
+  //         outerCb
+  //       ),
+  //     function () {
+  //       console.log('done')
+  //       catTableButton.detach()
+  //     }
+  //   )
+  // }
 
-          outerCb
-        ),
-      function () {
-        console.log('done')
-        catTableButton.detach()
-      }
-    )
-  }
-
-  if (allCategories.length) {
-    catTableButton.on('click', fetchAllCategories)
-  }
+  // if (allCategories.length) {
+  //   catTableButton.on('click', fetchAllCategories)
+  // }
 }
 
 try {
