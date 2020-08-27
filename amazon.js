@@ -103,13 +103,8 @@ const main = () => {
   let catTableButton
 
   const authorRank = build(`<div class="authorRank" style="display:none">`)
-  // const authorRank = document.createElement('div')
-  // authorRank.classList.add('authorRank')
-  // authorRank.style.display = 'none'
 
   const authorExpander = build(`<span class="expand">`)
-  // const authorExpander = document.createElement('span')
-  // authorExpander.classList.add('expand')
   ;(() => {
     const { host, protocol } = document.location
     const url = `${protocol}//${host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=${asin}`
@@ -138,11 +133,11 @@ const main = () => {
       })
   })()
 
-  const ratingAvgEl1 = $('#summaryStars a.product-reviews-link')
+  const ratingAvgEl1 = $('#acrPopover')
   const ratingAvgEl2 = $('#revFMSR a')
   const ratingAvg = toNumber(
     ratingAvgEl1
-      ? ratingAvgEl1.getAttribute('title')
+      ? ratingAvgEl1.getAttribute('title').replace(/\s.*/, '')
       : ratingAvgEl2
       ? ratingAvgEl2.getAttribute('title')
       : 0
@@ -195,74 +190,74 @@ const main = () => {
     `)
   }
 
-  const helperEl = build('<div id="amazon-product-info-ext"/>', [
-    build(`<b>${$('#title').innerText}</b>`),
-    build('<br/>'), // ------------
-    'Publisher: ',
-    build(
-      /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
-        ? '<span class=hi>Self-Published</span>'
-        : publisher
-    ),
-    ' - ',
-    'Author: ',
-    build('<span class="authors"/>', [author]),
-    authorExpander,
-    length
-      ? build(
-          ` - Length: ${length} (~${words.toLocaleString()} words)` +
-            '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
-        )
-      : '',
-    fileSize ? ` - Size: ${fileSize}` : '',
-    ' - ',
-    'ASIN: ',
-    asin,
-    build('<br/>'), // ------------
-    authorRank,
-    'Book Rank: #',
-    rank.toLocaleString(),
-    ' - ',
-    'Tier ',
-    tier,
-    build(
-      '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
-    ),
-    ' - ',
-    build(`<a href='https://www.novelrank.com/asin/${asin}'>NovelRank</a>`),
-    ' - ',
-    build(
-      `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
-        isEbook ? 1 : 0
-      }'>KP</a>`
-    ),
-    ' - ',
-    build(
-      `<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
-        isEbook ? 1 : 0
-      }'>TCK</a>`
-    ),
-    ' - ',
-    'Rating: ',
-    ratingAvg,
-    ' - ',
-    'Reviews: ',
-    build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
-    ' - ',
-    'Age: ',
-    `${Math.round(ageInWeeks)} weeks`,
-    ' - ',
-    'Ratio: ',
-    Number(ratingCount / ageInWeeks).toFixed(2),
-    build(
-      '<sup><abbr title="Number of ratings divided by the age in weeks">?</abbr></sup>'
-    ),
-    build('<br/>'), // ------------
-    build('<div class="cat-table"/>', [
-      build('<div class="cat-table-cell"/>', categories),
-      build('<div class="cat-table-cell"/>', [catTableButton]),
-    ]),
-  ])
+  const helperEl = build(
+    '<div id="amazon-product-info-ext" style="margin-bottom:10px"/>',
+    [
+      build(`<b>${$('#title').innerText}</b>`),
+      build('<br/>'), // ------------
+      'Publisher: ',
+      build(
+        /Amazon\s+Digital\s+Services\s+LLC/.test(publisher)
+          ? '<span class=hi>Self-Published</span>'
+          : publisher
+      ),
+      ' - ',
+      'Author: ',
+      build('<span class="authors"/>', [author]),
+      authorExpander,
+      length
+        ? build(
+            `&nbsp;- Length: ${length} (~${words.toLocaleString()} words)` +
+              '<sup><abbr title="Number of pages times 250 words per page">?</abbr></sup>'
+          )
+        : '',
+      fileSize ? ` - Size: ${fileSize}` : '',
+      ' - ',
+      'ASIN: ',
+      asin,
+      build('<br/>'), // ------------
+      authorRank,
+      'Book Rank: #',
+      rank.toLocaleString(),
+      ' - ',
+      'Tier ',
+      tier,
+      build(
+        '<sup><abbr title="From Chris Fox\'s &quot;Writing To Market&quot;">?</abbr></sup>'
+      ),
+      ' - ',
+      build(`<a href='https://www.novelrank.com/asin/${asin}'>NovelRank</a>`),
+      ' - ',
+      build(
+        `<a href='https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/#${rank},${
+          isEbook ? 1 : 0
+        }'>KP</a>`
+      ),
+      ' - ',
+      build(
+        `<a href='http://www.tckpublishing.com/amazon-book-sales-calculator/#${rank},${
+          isEbook ? 1 : 0
+        }'>TCK</a>`
+      ),
+      ' - ',
+      'Rating: ',
+      ratingAvg,
+      ' - ',
+      'Reviews: ',
+      build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
+      ' - ',
+      'Age: ',
+      `${Math.round(ageInWeeks)} weeks`,
+      ' - ',
+      'Rvws/Wk: ',
+      Number(ratingCount / ageInWeeks).toFixed(2),
+      build('<br/>'), // ------------
+      build('<div class="cat-table"/>', [
+        build('<div class="cat-table-cell"/>', categories),
+        build('<div class="cat-table-cell"/>', [catTableButton]),
+      ]),
+    ]
+  )
   $('header').appendChild(helperEl)
 
   const close = build(
