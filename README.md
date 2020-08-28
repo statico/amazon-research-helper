@@ -1,9 +1,9 @@
 # Amazon Book Research Helper
 
-Adds at-a-glance information to the top of Amazon book listings to reduce scrolling. 
+Adds at-a-glance information to the top of Amazon book listings to reduce scrolling.
 
-* [Install for Google Chrome](https://chrome.google.com/webstore/detail/cnhlmanemmekoedeblbknpodncnncbof)
-* Install for Firefox (currently not available)
+- [Install for Google Chrome](https://chrome.google.com/webstore/detail/cnhlmanemmekoedeblbknpodncnncbof)
+- [Install for Firefox](https://addons.mozilla.org/en-US/firefox/addon/amazon-book-research-helper/)
 
 ![screenshot](https://user-images.githubusercontent.com/137158/91470233-4e2c3c80-e849-11ea-83ba-b7683e2f8cac.png)
 
