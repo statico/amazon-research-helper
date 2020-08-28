@@ -1,4 +1,4 @@
-const debug = false
+const debug = true
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -45,6 +45,7 @@ const main = () => {
     return
   }
 
+  let rank = null
   const info = {}
   let categories = []
   let bullets = [
@@ -67,6 +68,7 @@ const main = () => {
 
     if (key === 'Amazon Best Sellers Rank') {
       categories = el.querySelectorAll('ul.zg_hrsr')
+      rank = toNumber(val)
     }
   })
 
@@ -81,10 +83,18 @@ const main = () => {
   categories = Array.from(categories).map((el) => el.cloneNode(true))
   categories.forEach((el) => {
     el.style.display = 'block'
+    if (!/^\s*#/.test(el.innerText)) {
+      el.innerHTML = '#' + el.innerHTML
+    }
   })
 
+  if (!rank) {
+    const text = $('#detailBullets_feature_div').innerText
+    const match = text.match(/best.?sellers rank #?(\d+)/i)
+    if (match) rank = toNumber(match[1])
+  }
+
   const asin = info['ASIN']
-  let rank = toNumber(info['Amazon Best Sellers Rank'])
   const tier =
     rank < 10
       ? '1'
@@ -98,10 +108,9 @@ const main = () => {
       ? 'V'
       : 'VI'
 
-  let author = $('.author .contributorNameID').cloneNode(true)
-  if (!author.length) {
-    author = $('.author .a-link-normal').cloneNode(true)
-  }
+  let author = $('.author .contributorNameID')
+  if (!author) author = $('.author .a-link-normal').cloneNode(true)
+  author = author.cloneNode(true)
   author.setAttribute('target', '_blank')
 
   const authorRank = build(`<div class="authorRank" style="display:none">`)
@@ -204,7 +213,7 @@ const main = () => {
     build('<br/>'), // ------------
     authorRank,
     'Book Rank: #',
-    rank.toLocaleString(),
+    rank ? rank.toLocaleString() : '?',
     ' - ',
     'Tier ',
     tier,
