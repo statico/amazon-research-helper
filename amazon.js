@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -41,7 +41,7 @@ const toNumber = function (val) {
 
 const main = () => {
   const bodyText = document.body.innerText
-  if (!/Amazon Best(s| S)ellers Rank|Best-sellers rank/.test(bodyText)) {
+  if (!/Amazon Best(s| S)ellers Rank|Best-?sellers rank/.test(bodyText)) {
     return
   }
 
@@ -84,13 +84,13 @@ const main = () => {
   categories.forEach((el) => {
     el.style.display = 'block'
     if (!/^\s*#/.test(el.innerText)) {
-      el.innerHTML = '#' + el.innerHTML
+      el.insertBefore(document.createTextNode('#'), el.firstChild)
     }
   })
 
   if (!rank) {
     const text = $('#detailBullets_feature_div').innerText
-    const match = text.match(/best.?sellers rank #?(\d+)/i)
+    const match = text.match(/best.?sellers rank #?([\d,]+)/i)
     if (match) rank = toNumber(match[1])
   }
 
