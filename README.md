@@ -5,8 +5,6 @@ Adds at-a-glance information to the top of Amazon book listings to reduce scroll
 * [Install for Google Chrome](https://chrome.google.com/webstore/detail/cnhlmanemmekoedeblbknpodncnncbof)
 * Install for Firefox (currently not available)
 
-**2020 Update:** Not as useful as it was in 2016. This extension used to scrape _all_ categories for a book instead of just the top three, but that no longer seems possible. Also, NovelRank has shut down.
-
 ![screenshot](https://user-images.githubusercontent.com/137158/91470233-4e2c3c80-e849-11ea-83ba-b7683e2f8cac.png)
 
 - Shows "Self Published" if the book was self published

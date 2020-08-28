@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -66,8 +66,21 @@ const main = () => {
     debug(`Detail key "${key}": "${val}"`)
 
     if (key === 'Amazon Best Sellers Rank') {
-      return (categories = el.querySelectorAll('ul.zg_hrsr'))
+      categories = el.querySelectorAll('ul.zg_hrsr')
     }
+  })
+
+  if (!categories.length) {
+    const el = $('#detailBullets_feature_div')
+    if (!el) return
+    const el2 = el.querySelectorAll('.a-unordered-list')[1]
+    if (!el2) return
+    categories = el2.querySelectorAll('.a-list-item > span > span')
+  }
+
+  categories = Array.from(categories).map((el) => el.cloneNode(true))
+  categories.forEach((el) => {
+    el.style.display = 'block'
   })
 
   const asin = info['ASIN']
@@ -162,6 +175,9 @@ const main = () => {
   const fileSize = info['File Size']
   const isEbook = Boolean(fileSize)
 
+  const host = document.location.host
+  const tld = host.split('.').slice(-1)[0]
+
   const helperEl = build('<div id="amazon-product-info-ext"/>', [
     build(`<b>${$('#title').innerText}</b>`),
     build('<br/>'), // ------------
@@ -208,6 +224,8 @@ const main = () => {
       }'>TCK</a>`
     ),
     ' - ',
+    build(`<a href='https://camelcamelcamel.com/product/${asin}'>CCC</a>`),
+    ' - ',
     'Rating: ',
     ratingAvg,
     ' - ',
@@ -220,9 +238,13 @@ const main = () => {
     'Rvws/Wk: ',
     Number(ratingCount / ageInWeeks).toFixed(2),
     build('<br/>'), // ------------
-    build('<div class="cat-table"/>', [
-      build('<div class="cat-table-cell"/>', categories),
-    ]),
+    build('<br/>'), // ------------
+    ...categories,
+    build(`
+      <a href="https://www.bklnk.com/categories5.php#${asin},${tld}">
+        See All Categories on BKLNK...
+      </a>
+    `),
   ])
   $('header').appendChild(helperEl)
 

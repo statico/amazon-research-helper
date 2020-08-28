@@ -1,9 +1,0 @@
-{
-  "name": "amazon-book-research-helper",
-  "private": true,
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "author": "",
-  "license": "MIT"
-}

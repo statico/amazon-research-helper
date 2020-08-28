@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Amazon Book Research Helper",
   "description": "Writing to market? This extension shows the most important information about a book right at the top of the page.",
-  "version": "1.1",
+  "version": "1.2",
   "author": "Ian L.",
   "icons": {
     "128": "assets/icon128.png",
@@ -32,6 +32,10 @@
         "https://www.tckpublishing.com/amazon-book-sales-calculator/*"
       ],
       "js": ["tck.js"]
+    },
+    {
+      "matches": ["https://www.bklnk.com/*"],
+      "js": ["bklnk.js"]
     }
   ],
   "permissions": [
@@ -40,6 +44,7 @@
     "*://*.amazon.com.au/*",
     "*://*.amazon.co.uk/*",
     "https://www.tckpublishing.com/amazon-book-sales-calculator/*",
-    "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*"
+    "https://kindlepreneur.com/amazon-kdp-sales-rank-calculator/*",
+    "https://www.bklnk.com/*"
   ]
 }
