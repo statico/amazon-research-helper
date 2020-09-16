@@ -41,7 +41,7 @@ const toNumber = function (val) {
 
 const main = () => {
   const bodyText = document.body.innerText
-  if (!/Amazon Best(s| S)ellers Rank|Best-?sellers rank/.test(bodyText)) {
+  if (!/(Amazon )?Best(s| S)ellers Rank|Best-?sellers rank/.test(bodyText)) {
     return
   }
 
@@ -56,6 +56,11 @@ const main = () => {
     let keyEl = el.querySelector('b') || el.querySelector('.a-text-bold')
     if (!keyEl) return
     let key = keyEl.innerText.replace(/\s*:\s*$/, '').trim()
+
+    // Normalize amazon.com
+    if (key === 'Best Sellers Rank') {
+      key = 'Amazon Best Sellers Rank'
+    }
 
     // Normalize amazon.co.uk
     if (key === 'Amazon Bestsellers Rank') {
@@ -247,8 +252,7 @@ const main = () => {
     'Rvws/Wk: ',
     Number(ratingCount / ageInWeeks).toFixed(2),
     build('<br/>'), // ------------
-    build('<br/>'), // ------------
-    ...categories,
+    build('<div style="margin:0.6em 0" />', categories),
     build(`
       <a href="https://www.bklnk.com/categories5.php#${asin},${tld}">
         See All Categories on BKLNK...

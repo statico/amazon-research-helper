@@ -32,7 +32,7 @@
 #amazon-product-info-ext .authorRank {
   color: #111;
   margin-top: 5px;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.1;
 }
 
@@ -62,5 +62,5 @@
 }
 
 #amazon-product-info-ext .expand {
-  font-size: 11px;
+  font-size: 13px;
 }
