@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Amazon Book Research Helper",
   "description": "Writing to market? This extension shows the most important information about a book right at the top of the page.",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "Ian L.",
   "icons": {
     "128": "assets/icon128.png",
