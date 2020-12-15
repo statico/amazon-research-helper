@@ -17,8 +17,6 @@ Adds at-a-glance information to the top of Amazon book listings to reduce scroll
 
 ### Development
 
-Historically, this extension used CoffeScript, jQuery and moment.js, and the Firefox store didn't like that because they don't want their extensions relying on third-party libraries or something. In 20202 I rewrote this extension to have no dependencies with help from [decaffeinate](https://github.com/decaffeinate/decaffeinate), [You Might Not Need jQuery](http://youmightnotneedjquery.com/), [You Don't Need Moment.js](https://github.com/you-dont-need/You-Dont-Need-Momentjs#parse), and [caniuse.com](https://caniuse.com/).
-
 To work on this extension,
 
 1. Clone this repo
@@ -26,3 +24,5 @@ To work on this extension,
 3. Go to an Amazon page for a book
 
 Optionally, install the [Extensions Reloader](https://chrome.google.com/webstore/detail/fimgfedafeadlieiabdeeaodndnlbhid) extension for one-click reloading. (You have to remove the extension and re-add it if you change `manifest.json`, however.)
+
+Historically, this extension used CoffeScript, jQuery and moment.js, and the Firefox store didn't like that because they don't want their extensions relying on third-party libraries or something. In 20202 I rewrote this extension to have no dependencies with help from [decaffeinate](https://github.com/decaffeinate/decaffeinate), [You Might Not Need jQuery](http://youmightnotneedjquery.com/), [You Don't Need Moment.js](https://github.com/you-dont-need/You-Dont-Need-Momentjs#parse), and [caniuse.com](https://caniuse.com/).

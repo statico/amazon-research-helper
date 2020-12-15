@@ -1,3 +1,4 @@
+// Set this to true for detailed console debugging.
 const debug = false
   ? (...args) => {
       console.log(
@@ -150,17 +151,6 @@ const main = () => {
       })
   })()
 
-  const ratingAvgEl1 = $('#acrPopover')
-  const ratingAvgEl2 = $('#revFMSR a')
-  const ratingAvg = toNumber(
-    ratingAvgEl1
-      ? ratingAvgEl1.getAttribute('title').replace(/\s.*/, '')
-      : ratingAvgEl2
-      ? ratingAvgEl2.getAttribute('title')
-      : 0
-  )
-  debug('ratingAvg', ratingAvg)
-
   const ratingCountEl1 = $('#acrCustomerReviewText')
   const ratingCountEl2 = $('#revSAFRLU')
   const ratingCount = toNumber(
@@ -172,17 +162,35 @@ const main = () => {
   )
   debug('ratingCount', ratingCount)
 
-  const publisher = info['Publisher']
-    ? info['Publisher'].replace(/;.*/, '')
-    : info['Sold by']
+  const ratingAvgEl1 = $('#acrPopover')
+  const ratingAvgEl2 = $('#revFMSR a')
+  const ratingAvg =
+    ratingCount === 0
+      ? 'none'
+      : toNumber(
+          ratingAvgEl1
+            ? ratingAvgEl1.getAttribute('title').replace(/\s.*/, '')
+            : ratingAvgEl2
+            ? ratingAvgEl2.getAttribute('title')
+            : 0
+        )
+  debug('ratingAvg', ratingAvg)
+
+  const publisher =
+    (info['Publisher']
+      ? info['Publisher'].replace(/;.*/, '')
+      : info['Sold by']) || '?'
 
   const pubDateRaw =
-    info['Publication Date'] || info['Publisher'].match(/\((.*)\)/)[1]
+    info['Publication Date'] ||
+    info['Publication date'] ||
+    info['Publisher'].match(/\((.*)\)/)[1]
   debug('pubDateRaw', pubDateRaw)
   const pubDate = new Date(pubDateRaw)
   debug('pubDate', pubDate)
   const diff = new Date() - new Date(pubDate)
   const ageInWeeks = diff / 1000 / 60 / 60 / 24 / 7
+  const age = ageInWeeks >= 0 ? `${Math.round(ageInWeeks)} weeks` : 'Unreleased'
 
   const length = info['Print Length'] || info['Paperback'] || info['Hardcover']
   const words = length ? toNumber(length) * 250 : 0
@@ -247,7 +255,7 @@ const main = () => {
     build(`<a href=#customerReviews>${ratingCount.toLocaleString()}</a>`),
     ' - ',
     'Age: ',
-    `${Math.round(ageInWeeks)} weeks`,
+    age,
     ' - ',
     'Rvws/Wk: ',
     Number(ratingCount / ageInWeeks).toFixed(2),
