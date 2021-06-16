@@ -1,5 +1,5 @@
 // Set this to true for detailed console debugging.
-const debug = false
+const debug = true
   ? (...args) => {
       console.log(
         `%c${args.join(' ')}`,
@@ -56,7 +56,7 @@ const main = () => {
   bullets.forEach((el) => {
     let keyEl = el.querySelector('b') || el.querySelector('.a-text-bold')
     if (!keyEl) return
-    let key = keyEl.innerText.replace(/\s*:\s*$/, '').trim()
+    let key = keyEl.innerText.replace(/[\s\u200f\u200e]*:[\s\u200f\u200e]*$/, '').trim()
 
     // Normalize amazon.com
     if (key === 'Best Sellers Rank') {
@@ -68,9 +68,9 @@ const main = () => {
       key = 'Amazon Best Sellers Rank'
     }
 
-    const val = el.innerText.replace(/^.*?:\s*/, '')
+    const val = el.innerText.replace(/^.*?:[\s\u200f\u200e]*/, '')
     info[key] = val
-    debug(`Detail key "${key}": "${val}"`)
+    debug(`Detail key "${key}" => "${val}"`)
 
     if (key === 'Amazon Best Sellers Rank') {
       categories = el.querySelectorAll('ul.zg_hrsr')
