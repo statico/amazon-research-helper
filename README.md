@@ -39,4 +39,4 @@ This extension used to use CoffeScript, jQuery and moment.js, but the Firefox st
 1. Update the version in `manifest.json`
 1. Install [web-ext](https://github.com/mozilla/web-ext) (`npm i -g web-ext`)
 1. `web-ext build`
-1. Upload the .zip to Google and Firefox
+1. Upload `web-ext-artifacts/*.zip` to Google and Firefox
