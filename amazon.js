@@ -1,9 +1,10 @@
 // Set this to true for detailed console debugging.
-const debug = true
+const debug = false
   ? (...args) => {
       console.log(
-        `%c${args.join(' ')}`,
-        'background-color: #a7f6fa; color: #111; padding: 2px;'
+        `%c${args[0]}`,
+        'background-color: #a7f6fa; color: #111; padding: 2px;',
+        ...args.slice(1),
       )
     }
   : () => {}
@@ -17,18 +18,32 @@ const parseHTML = function (str) {
 }
 
 const build = (html, children) => {
-  const container = parseHTML(html)[0]
-  if (children)
-    Array.from(children)
-      .map((el) =>
-        typeof el === 'string'
-          ? document.createTextNode(el)
-          : typeof el === 'number'
-          ? document.createTextNode(String(el))
-          : el
-      )
-      .forEach((el) => container.appendChild(el))
-  return container
+  try {
+    const container = parseHTML(html)[0]
+    if (children)
+      Array.from(children)
+        .map((el) =>
+          typeof el === "undefined"
+            ? document.createTextNode('undefined')
+            : typeof el === "string"
+            ? document.createTextNode(el)
+            : typeof el === "number"
+            ? document.createTextNode(String(el))
+            : el
+        )
+        .forEach((el) => {
+          try {
+            container.appendChild(el)
+          } catch (err) {
+            debug(`Failed to append child:`, el)
+            throw err
+          }
+        })
+    return container
+  } catch (err) {
+    debug(`Failed to build HTML`, html)
+    throw err
+  }
 }
 
 const toNumber = function (val) {
@@ -73,7 +88,7 @@ const main = () => {
     debug(`Detail key "${key}" => "${val}"`)
 
     if (key === 'Amazon Best Sellers Rank') {
-      categories = el.querySelectorAll('ul.zg_hrsr')
+      categories = el.querySelectorAll('ul.zg_hrsr li')
       rank = toNumber(val)
     }
   })
@@ -100,7 +115,10 @@ const main = () => {
     if (match) rank = toNumber(match[1])
   }
 
-  const asin = info['ASIN']
+  const asin = $('#ASIN')?.value?.trim() || 
+    document.querySelector('link[rel="canonical"]')?.href?.match(/(\w+)$/)[1]
+  debug('ASIN', asin)
+
   const tier =
     rank < 10
       ? '1'
@@ -123,6 +141,10 @@ const main = () => {
 
   const authorExpander = build(`<span class="expand">`)
   ;(() => {
+    if (!asin) {
+      debug('Missing ASIN!')
+      return
+    }
     const { host, protocol } = document.location
     const url = `${protocol}//${host}/gp/product/features/entity-teaser/books-entity-teaser-ajax.html?ASIN=${asin}`
     debug('Will fetch', url)
@@ -184,7 +206,7 @@ const main = () => {
   const pubDateRaw =
     info['Publication Date'] ||
     info['Publication date'] ||
-    info['Publisher'].match(/\((.*)\)/)[1]
+    info['Publisher'].replace(/\(\D+\)/, '').match(/\((.*)\)/)[1]
   debug('pubDateRaw', pubDateRaw)
   const pubDate = new Date(pubDateRaw)
   debug('pubDate', pubDate)
