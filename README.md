@@ -38,5 +38,11 @@ This extension used to use CoffeScript, jQuery and moment.js, but the Firefox st
    - [amazon.ca](https://www.amazon.ca/Dude-Perfect-Tricks-Tips-Stuff/dp/1400217075/)
 1. Update the version in `manifest.json`
 1. Install [web-ext](https://github.com/mozilla/web-ext) (`npm i -g web-ext`)
-1. `web-ext build`
-1. Upload `web-ext-artifacts/*.zip` to Google and Firefox
+1. Release for Firefox:
+   1. `web-ext build`
+   1. Upload `web-ext-artifacts/*.zip` to the [Firefox Add-on Developer Hub](https://addons.mozilla.org/en-US/developers/addons)
+1. Release for Chrome:
+   1. `rm -f web-ext-artifacts/*.zip`
+   1. Temporarily remove the `browser_specific_settings` section from `manifest.json`
+   1. `web-ext build`
+   1. Upload `web-ext-artifacts/*.zip` to the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole/)
