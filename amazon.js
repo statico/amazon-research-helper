@@ -115,7 +115,7 @@ const main = () => {
     if (match) rank = toNumber(match[1])
   }
 
-  const asin = $('#ASIN')?.value?.trim() || 
+  const asin = $('#ASIN')?.value?.trim() ||
     document.querySelector('link[rel="canonical"]')?.href?.match(/(\w+)$/)[1]
   debug('ASIN', asin)
 
@@ -133,7 +133,7 @@ const main = () => {
       : 'VI'
 
   let author = $('.author .contributorNameID')
-  if (!author) author = $('.author .a-link-normal').cloneNode(true)
+  if (!author) author = $('.author a').cloneNode(true)
   author = author.cloneNode(true)
   author.setAttribute('target', '_blank')
 
