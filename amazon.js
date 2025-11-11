@@ -119,6 +119,9 @@ const main = () => {
     document.querySelector('link[rel="canonical"]')?.href?.match(/(\w+)$/)[1]
   debug('ASIN', asin)
 
+  const isbn = info['ISBN-10'] || info['ISBN-13'] || info['ISBN'] || null
+  debug('ISBN', isbn)
+
   const tier =
     rank < 10
       ? '1'
@@ -245,6 +248,7 @@ const main = () => {
     ' - ',
     'ASIN: ',
     asin,
+    ...(isbn ? [' - ', 'ISBN: ', isbn] : []),
     build('<br/>'), // ------------
     authorRank,
     'Book Rank: #',
